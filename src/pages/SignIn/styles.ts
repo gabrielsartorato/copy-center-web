@@ -11,7 +11,8 @@ export const Container = styled.div`
 `;
 
 export const Content = styled.div`
-  width: 460px;
+  width: 100%;
+  max-width: 460px;
   height: 300px;
 
   background: #ffffff;
