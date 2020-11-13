@@ -18,6 +18,7 @@ const SignIn: React.FC = () => {
   const formRef = useRef(null);
   const handleSubmit = useCallback(
     (data: SignInFormData) => {
+      console.log(data);
       history.push('/Dashboard');
     },
     [history],
