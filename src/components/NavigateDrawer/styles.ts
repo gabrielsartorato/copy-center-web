@@ -1,8 +1,14 @@
-import styled from 'styled-components';
+import { Link, LinkProps } from 'react-router-dom';
+import styled, { css } from 'styled-components';
+
+interface LinkPropsAttributes extends LinkProps {
+  name: string;
+  path: string;
+}
 
 export const MenuDrawer = styled.aside`
   width: 100%;
-  max-width: 380px;
+  max-width: 340px;
   height: 100vh;
   background: #ffffff;
 `;
@@ -40,41 +46,49 @@ export const Header = styled.header`
 
 export const NavigateMenu = styled.div`
   margin: 16px;
+`;
 
-  a + a {
-    margin-top: 16px;
+export const NavigateLink = styled(Link)<LinkPropsAttributes>`
+  margin-top: 16px;
+
+  padding: 16px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+
+  border-radius: 10px;
+
+  font-size: 24px;
+
+  color: #696969;
+
+  svg {
+    margin-right: 28px;
   }
 
-  a {
-    padding: 16px;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-
-    border-radius: 10px;
-
-    font-size: 24px;
-
-    color: #696969;
-
-    svg {
-      margin-right: 28px;
-    }
+  &:hover {
+    background: #ffffe0;
   }
 
-  a:hover {
-    background: #e6e6fa;
-  }
+  ${(props) =>
+    props.name === props.path &&
+    css`
+      background: #e6e6fa;
+    `}
 `;
 
 export const Logout = styled.div`
   margin: 16px;
 
-  a {
+  button {
+    background: #ffffff;
+
+    width: 100%;
     padding: 16px;
     text-decoration: none;
     display: flex;
     align-items: center;
+    border: none;
 
     border-radius: 10px;
 
@@ -87,7 +101,7 @@ export const Logout = styled.div`
     }
   }
 
-  a:hover {
-    background: #e6e6fa;
+  button:hover {
+    background: #ffffe0;
   }
 `;

@@ -9,15 +9,19 @@ import { useField } from '@unform/core';
 
 import { IconBaseProps } from 'react-icons';
 
-import { Container } from './styles';
+import { FiAlertCircle } from 'react-icons/fi';
+import { Container, Error } from './styles';
+import { cpfMask } from '../../masks/cpfMask';
+import { phoneMask } from '../../masks/phoneMask';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   name: string;
   containerStyle?: object;
+  mask?: string;
   icon?: React.ComponentType<IconBaseProps>;
 }
 
-const Input: React.FC<InputProps> = ({ name, icon: Icon, ...rest }) => {
+const Input: React.FC<InputProps> = ({ name, icon: Icon, mask, ...rest }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [onFocused, setOnfocused] = useState<boolean>(false);
   const [onFilled, setIsFilled] = useState<boolean>(false);
@@ -36,13 +40,21 @@ const Input: React.FC<InputProps> = ({ name, icon: Icon, ...rest }) => {
   }, [onFocused]);
 
   const handleInputBlur = useCallback(() => {
+    if (mask === 'cpf') {
+      inputRef.current!.value = cpfMask(inputRef.current!.value);
+    }
+
+    if (mask === 'phone') {
+      inputRef.current!.value = phoneMask(inputRef.current!.value);
+    }
+
     setOnfocused(!onFocused);
 
     setIsFilled(!!inputRef.current?.value);
-  }, [onFocused]);
+  }, [onFocused, mask]);
 
   return (
-    <Container isFocus={onFocused} isFilled={onFilled}>
+    <Container isErrored={!!error} isFocus={onFocused} isFilled={onFilled}>
       {Icon && <Icon size={20} />}
       <input
         onFocus={handleInputFocus}
@@ -51,7 +63,11 @@ const Input: React.FC<InputProps> = ({ name, icon: Icon, ...rest }) => {
         defaultValue={defaultValue}
         {...rest}
       />
-      {error && <span>{error}</span>}
+      {error && (
+        <Error title={error}>
+          <FiAlertCircle color="#c53030" size={20} />
+        </Error>
+      )}
     </Container>
   );
 };

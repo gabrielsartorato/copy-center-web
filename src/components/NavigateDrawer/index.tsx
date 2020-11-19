@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 
 import {
   FiMenu,
@@ -8,10 +9,22 @@ import {
   FiFileText,
   FiPower,
 } from 'react-icons/fi';
+import { useAuth } from '../../hooks/auth';
 
-import { MenuDrawer, Header, Divider, NavigateMenu, Logout } from './styles';
+import {
+  MenuDrawer,
+  Header,
+  Divider,
+  NavigateMenu,
+  Logout,
+  NavigateLink,
+} from './styles';
 
 const NavigateDrawer: React.FC = () => {
+  const { signOut } = useAuth();
+
+  const { pathname } = useLocation();
+
   return (
     <MenuDrawer>
       <Header>
@@ -20,33 +33,33 @@ const NavigateDrawer: React.FC = () => {
       </Header>
       <Divider />
       <NavigateMenu>
-        <a href="/">
+        <NavigateLink name="/Dashboard" path={pathname} to="/">
           <FiMenu />
           Pagina Inicial
-        </a>
-        <a href="/">
+        </NavigateLink>
+        <NavigateLink name="/clients" path={pathname} to="/clients">
           <FiUser />
           Clientes
-        </a>
-        <a href="/">
+        </NavigateLink>
+        <NavigateLink name="/vendas" path={pathname} to="/">
           <FiCreditCard />
           Vendas
-        </a>
-        <a href="/">
+        </NavigateLink>
+        <NavigateLink name="/sales-report" path={pathname} to="/">
           <FiList />
           Relatório de vendas
-        </a>
-        <a href="/">
+        </NavigateLink>
+        <NavigateLink name="/services" path={pathname} to="/">
           <FiFileText />
           Serviços
-        </a>
+        </NavigateLink>
       </NavigateMenu>
       <Divider />
       <Logout>
-        <a href="/">
+        <button type="button" onClick={signOut}>
           <FiPower />
           Sair
-        </a>
+        </button>
       </Logout>
     </MenuDrawer>
   );

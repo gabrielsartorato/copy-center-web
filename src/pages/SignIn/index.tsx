@@ -7,21 +7,30 @@ import { FiLogIn, FiUser, FiLock } from 'react-icons/fi';
 import Input from '../../components/Input';
 
 import { Container, Content, Header, ContainerForm } from './styles';
+import { useAuth } from '../../hooks/auth';
 
 interface SignInFormData {
   user: string;
-  passwrod: string;
+  password: string;
 }
 
 const SignIn: React.FC = () => {
   const history = useHistory();
   const formRef = useRef(null);
+
+  const { signIn } = useAuth();
+
   const handleSubmit = useCallback(
-    (data: SignInFormData) => {
-      console.log(data);
-      history.push('/Dashboard');
+    async (data: SignInFormData) => {
+      try {
+        await signIn({ user_name: data.user, password: data.password });
+
+        history.push('/Dashboard');
+      } catch (err) {
+        console.log(err);
+      }
     },
-    [history],
+    [history, signIn],
   );
 
   return (
@@ -34,7 +43,7 @@ const SignIn: React.FC = () => {
         <ContainerForm>
           <Form ref={formRef} onSubmit={handleSubmit}>
             <Input
-              name="usuario"
+              name="user"
               type="text"
               icon={FiUser}
               placeholder="Usuário"
