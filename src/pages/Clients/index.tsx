@@ -2,10 +2,13 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FiEdit } from 'react-icons/fi';
 import SelectSearch from 'react-select-search';
 
+import api from '../../services/api';
+import { phoneMask } from '../../masks/phoneMask';
+import { cpfMask } from '../../masks/cpfMask';
+import { useAuth } from '../../hooks/auth';
+
 import NavigateDrawer from '../../components/NavigateDrawer';
 import ModalAddClient from '../../components/ModalAddClient';
-
-import './stylescss.css';
 
 import {
   Container,
@@ -15,9 +18,7 @@ import {
   ContainerTable,
 } from './styles';
 
-import api from '../../services/api';
-import { phoneMask } from '../../masks/phoneMask';
-import { cpfMask } from '../../masks/cpfMask';
+import './stylescss.css';
 
 interface IClientResponse {
   id: string;
@@ -31,15 +32,22 @@ interface IClientResponse {
 }
 
 const Clients: React.FC = () => {
+  const { signOut } = useAuth();
   const [clients, setClients] = useState<IClientResponse[]>([]);
   const [specifClient, setSpecificClient] = useState<IClientResponse>();
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
-    api.get('/clients').then((response) => {
-      setClients(response.data.clients);
-    });
-  }, []);
+    api
+      .get('/clients')
+      .then((response) => {
+        setClients(response.data.clients);
+      })
+      .catch((error) => {
+        console.log(error);
+        signOut();
+      });
+  }, [signOut]);
 
   async function handleAddClient(data: IClientResponse): Promise<void> {
     setClients([...clients, data]);
@@ -81,11 +89,20 @@ const Clients: React.FC = () => {
       : null;
   }, [specifClient]);
 
-  const handleSelecChange = useCallback((e) => {
-    api.get(`clients/${e}`).then((response) => {
-      setSpecificClient(response.data);
-    });
-  }, []);
+  const handleSelecChange = useCallback(
+    (e) => {
+      api
+        .get(`clients/${e}`)
+        .then((response) => {
+          setSpecificClient(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+          signOut();
+        });
+    },
+    [signOut],
+  );
 
   const optionsSelect = useMemo(() => {
     return clients.map((client) => ({
