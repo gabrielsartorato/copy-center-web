@@ -33,7 +33,7 @@ const NavigateDrawer: React.FC = () => {
       </Header>
       <Divider />
       <NavigateMenu>
-        <NavigateLink name="/Dashboard" path={pathname} to="/">
+        <NavigateLink name="/dashboard" path={pathname} to="/">
           <FiMenu />
           Pagina Inicial
         </NavigateLink>

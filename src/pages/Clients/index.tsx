@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { FiEdit } from 'react-icons/fi';
+import { FiDelete, FiEdit } from 'react-icons/fi';
 import SelectSearch from 'react-select-search';
 
 import api from '../../services/api';
@@ -19,6 +19,7 @@ import {
 } from './styles';
 
 import './stylescss.css';
+import ModalEditClient from '../../components/ModalEditClient';
 
 interface IClientResponse {
   id: string;
@@ -31,11 +32,30 @@ interface IClientResponse {
   created_at: string;
 }
 
+interface IEditClient {
+  id: string;
+  client_name: string;
+  cpf_cnpj: string;
+  email: string;
+  status: number;
+  user_id: string;
+  phone_number?: string;
+  created_at?: string;
+  formatPhone?: string | null;
+  formatStatus?: string | null;
+  formatCreatedAt?: string | null;
+  formatCpf?: string | null;
+}
+
 const Clients: React.FC = () => {
   const { signOut } = useAuth();
   const [clients, setClients] = useState<IClientResponse[]>([]);
+  const [editingClient, setEditingClient] = useState<IEditClient>(
+    {} as IEditClient,
+  );
   const [specifClient, setSpecificClient] = useState<IClientResponse>();
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalEditOpen, setModalEditOpen] = useState(false);
 
   useEffect(() => {
     api
@@ -53,9 +73,56 @@ const Clients: React.FC = () => {
     setClients([...clients, data]);
   }
 
+  async function handleUpdateClient(data: any): Promise<void> {
+    const findIndex = clients.findIndex((client) => client.id === data.id);
+
+    clients[findIndex] = data;
+
+    setClients([...clients]);
+  }
+
+  function editClient(client: IEditClient): void {
+    setEditingClient(client);
+    toggleOpenEditModal();
+  }
+
   function toggleModal(): void {
     setModalOpen(!modalOpen);
   }
+
+  function toggleOpenEditModal(): void {
+    setModalEditOpen(!modalEditOpen);
+  }
+
+  const handleInativeClient = useCallback(
+    async (id: string, status: number) => {
+      const response = await api.patch(`clients/${id}`, {
+        status: status === 1 ? 0 : 1,
+      });
+
+      const findIndex = clients.findIndex((client) => client.id === id);
+
+      clients[findIndex] = response.data;
+
+      setClients([...clients]);
+    },
+    [clients],
+  );
+
+  const handleSelecChange = useCallback(
+    (e) => {
+      api
+        .get(`clients/${e}`)
+        .then((response) => {
+          setSpecificClient(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+          signOut();
+        });
+    },
+    [signOut],
+  );
 
   const parsedClients = useMemo(() => {
     return clients.map((client) => {
@@ -82,27 +149,12 @@ const Clients: React.FC = () => {
           formatCreatedAt: new Date(specifClient.created_at).toLocaleDateString(
             'pt-Br',
           ),
-          formatCpf: specifClient?.cpf_cnpj
+          formatCpf: specifClient.cpf_cnpj
             ? cpfMask(specifClient.cpf_cnpj)
             : null,
         })
       : null;
   }, [specifClient]);
-
-  const handleSelecChange = useCallback(
-    (e) => {
-      api
-        .get(`clients/${e}`)
-        .then((response) => {
-          setSpecificClient(response.data);
-        })
-        .catch((error) => {
-          console.log(error);
-          signOut();
-        });
-    },
-    [signOut],
-  );
 
   const optionsSelect = useMemo(() => {
     return clients.map((client) => ({
@@ -125,7 +177,13 @@ const Clients: React.FC = () => {
           setIsOpen={toggleModal}
           handleAddClient={handleAddClient}
         />
-        <SearchClient>
+        <ModalEditClient
+          isOpen={modalEditOpen}
+          setIsOpen={toggleOpenEditModal}
+          editingClient={editingClient}
+          handleUpdateClient={handleUpdateClient}
+        />
+        <SearchClient modalCreateOpen={modalOpen} modalEditOpen={modalEditOpen}>
           <SelectSearch
             onChange={(e) => handleSelecChange(e)}
             options={optionsSelect}
@@ -160,12 +218,23 @@ const Clients: React.FC = () => {
                 <td>
                   <button
                     type="button"
-                    onClick={() => {
-                      console.log('teste');
-                    }}
+                    onClick={() => editClient(speficFormatedClient)}
                   >
                     <FiEdit />
                     Editar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleInativeClient(
+                        speficFormatedClient.id,
+                        speficFormatedClient.status,
+                      )
+                    }
+                    name="inative"
+                  >
+                    <FiDelete />
+                    Inativar
                   </button>
                 </td>
               </tr>
@@ -179,20 +248,24 @@ const Clients: React.FC = () => {
                   <td>{client.formatStatus}</td>
                   <td>{client.formatCreatedAt}</td>
                   <td>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        console.log('teste');
-                      }}
-                    >
+                    <button type="button" onClick={() => editClient(client)}>
                       <FiEdit />
                       Editar
+                    </button>
+                    <button
+                      type="button"
+                      name="inative"
+                      onClick={() =>
+                        handleInativeClient(client.id, client.status)
+                      }
+                    >
+                      <FiDelete />
+                      Inativar
                     </button>
                   </td>
                 </tr>
               ))
             )}
-            {/*  */}
           </tbody>
         </ContainerTable>
       </Content>

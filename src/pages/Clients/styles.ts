@@ -1,5 +1,10 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { shade } from 'polished';
+
+interface SearcheClient {
+  modalCreateOpen: boolean;
+  modalEditOpen: boolean;
+}
 
 export const Container = styled.div`
   width: 100vw;
@@ -34,7 +39,7 @@ export const HeaderButtonAddClient = styled.div`
   }
 `;
 
-export const SearchClient = styled.div`
+export const SearchClient = styled.div<SearcheClient>`
   display: flex;
 
   margin-top: 32px;
@@ -46,6 +51,22 @@ export const SearchClient = styled.div`
   border-radius: 8px;
 
   align-items: center;
+
+  ${(props) =>
+    props.modalCreateOpen &&
+    css`
+      .select-search {
+        visibility: hidden;
+      }
+    `}
+
+  ${(props) =>
+    props.modalEditOpen &&
+    css`
+      .select-search {
+        visibility: hidden;
+      }
+    `}
 
   button[type='button'] {
     margin-left: 16px;
@@ -89,21 +110,38 @@ export const ContainerTable = styled.table`
     border-bottom: 1px solid rgba(224, 224, 224, 1);
   }
 
+  tbody tr td:last-child {
+    display: flex;
+  }
+
   tbody tr td button {
     display: flex;
     align-items: center;
 
+    padding: 8px;
+
     border: none;
-    background: none;
+    background: #87ceeb;
 
     width: 100%;
 
     text-align: left;
+
+    border-radius: 8px;
 
     svg {
       margin-right: 8px;
       width: 24px;
       height: 24px;
     }
+  }
+
+  tbody tr td button[name='inative'] {
+    background: red;
+
+    border-radius: 8px;
+    padding: 8px;
+
+    color: #ffffff;
   }
 `;

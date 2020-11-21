@@ -40,18 +40,20 @@ const Input: React.FC<InputProps> = ({ name, icon: Icon, mask, ...rest }) => {
   }, [onFocused]);
 
   const handleInputBlur = useCallback(() => {
-    if (mask === 'cpf') {
-      inputRef.current!.value = cpfMask(inputRef.current!.value);
-    }
-
-    if (mask === 'phone') {
-      inputRef.current!.value = phoneMask(inputRef.current!.value);
-    }
-
     setOnfocused(!onFocused);
 
     setIsFilled(!!inputRef.current?.value);
-  }, [onFocused, mask]);
+  }, [onFocused]);
+
+  const handleInputMask = useCallback((maskType: any) => {
+    if (maskType === 'cpf') {
+      inputRef.current!.value = cpfMask(inputRef.current!.value);
+    }
+
+    if (maskType === 'phone') {
+      inputRef.current!.value = phoneMask(inputRef.current!.value);
+    }
+  }, []);
 
   return (
     <Container isErrored={!!error} isFocus={onFocused} isFilled={onFilled}>
@@ -59,6 +61,7 @@ const Input: React.FC<InputProps> = ({ name, icon: Icon, mask, ...rest }) => {
       <input
         onFocus={handleInputFocus}
         onBlur={handleInputBlur}
+        onChange={() => handleInputMask(mask)}
         ref={inputRef}
         defaultValue={defaultValue}
         {...rest}

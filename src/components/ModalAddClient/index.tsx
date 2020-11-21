@@ -108,7 +108,7 @@ const ModalAddClient: React.FC<IModalProps> = ({
 
         <Input
           minLength={11}
-          maxLength={14}
+          maxLength={18}
           mask="cpf"
           name="cpf_cnpj"
           placeholder="Digite o Cpf ou Cnpj Aqui"
@@ -117,7 +117,7 @@ const ModalAddClient: React.FC<IModalProps> = ({
 
         <Input
           mask="phone"
-          maxLength={11}
+          maxLength={15}
           name="phone"
           placeholder="(11) 4444-4444 ou (11) 97777-7777"
         />
