@@ -34,6 +34,8 @@
       "import/prefer-default-export": "off",
       "no-unused-expressions":"off",
       "no-use-before-define":"off",
+      "no-param-reassign":"off",
+      "no-plusplus":"off",
       "camelcase":"off",
       "react/jsx-curly-newline": "off",
       "import/no-duplicates":"off",

@@ -17,6 +17,27 @@ export const Form = styled(Unform)`
     margin-bottom: 40px;
   }
 
+  div {
+    display: flex;
+    label {
+      display: flex;
+    }
+    label + label {
+      margin-left: 16px;
+    }
+  }
+
+  input[type='checkbox'] {
+    width: 24px;
+    height: 24px;
+
+    margin-right: 8px;
+  }
+
+  input + input {
+    margin-right: 16px;
+  }
+
   button {
     margin-top: 48px;
     align-self: flex-end;

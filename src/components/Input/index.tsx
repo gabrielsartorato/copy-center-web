@@ -13,6 +13,7 @@ import { FiAlertCircle } from 'react-icons/fi';
 import { Container, Error } from './styles';
 import { cpfMask } from '../../masks/cpfMask';
 import { phoneMask } from '../../masks/phoneMask';
+import formatValue from '../../masks/moneyMask';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   name: string;
@@ -52,6 +53,10 @@ const Input: React.FC<InputProps> = ({ name, icon: Icon, mask, ...rest }) => {
 
     if (maskType === 'phone') {
       inputRef.current!.value = phoneMask(inputRef.current!.value);
+    }
+
+    if (maskType === 'price') {
+      inputRef.current!.value = formatValue(inputRef.current!.value);
     }
   }, []);
 

@@ -18,7 +18,7 @@ export const Content = styled.div`
   flex: 1;
 `;
 
-export const HeaderButtonAddClient = styled.div`
+export const HeaderButtonAddProduct = styled.div`
   margin-left: auto;
 
   button {
@@ -39,7 +39,7 @@ export const HeaderButtonAddClient = styled.div`
   }
 `;
 
-export const SearchClient = styled.div<SearcheClient>`
+export const SearchProduct = styled.div<SearcheClient>`
   display: flex;
 
   margin-top: 32px;
@@ -80,6 +80,10 @@ export const SearchClient = styled.div<SearcheClient>`
 
     color: #ffffff;
     font-weight: 500;
+
+    &:hover {
+      background: ${shade(0.1, '#dc004e')};
+    }
   }
 `;
 

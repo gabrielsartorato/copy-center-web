@@ -49,7 +49,7 @@ const NavigateDrawer: React.FC = () => {
           <FiList />
           Relatório de vendas
         </NavigateLink>
-        <NavigateLink name="/services" path={pathname} to="/">
+        <NavigateLink name="/products" path={pathname} to="/products">
           <FiFileText />
           Serviços
         </NavigateLink>
