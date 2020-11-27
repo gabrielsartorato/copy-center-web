@@ -3,7 +3,7 @@ import React, { useRef, useCallback } from 'react';
 import { FiCheckSquare } from 'react-icons/fi';
 import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
-import { Form } from './styles';
+import { Form, CheckBoxGroup } from './styles';
 
 import Modal from '../Modal';
 import Input from '../Input';
@@ -19,13 +19,6 @@ interface IProduct {
   price: number;
   height: number;
   width: number;
-}
-
-interface ICreateClientData {
-  product_name: string;
-  price: number;
-  use_height: string;
-  use_width: string;
 }
 
 interface IModalProps {
@@ -55,13 +48,11 @@ const ModalAddProduct: React.FC<IModalProps> = ({
         const dataForm = {
           product_name: data.product_name,
           price: formatValue,
-          use_height: data.checkbox[0] ? 1 : 0,
-          use_width: data.checkbox[1] ? 1 : 0,
+          use_height: data.height[0] ? 1 : 0,
+          use_width: data.width[0] ? 1 : 0,
         };
 
         const response = await api.post('/products', dataForm);
-
-        console.log(response.data);
 
         setIsOpen();
 
@@ -91,8 +82,11 @@ const ModalAddProduct: React.FC<IModalProps> = ({
     [setIsOpen, handleAddProduct, addToast],
   );
 
-  const checkboxOptions: CheckboxOption[] = [
+  const checkboxHeight: CheckboxOption[] = [
     { id: 'height', value: 'height', label: 'Altura' },
+  ];
+
+  const checkboxWidth: CheckboxOption[] = [
     { id: 'width', value: 'width', label: 'Largura' },
   ];
 
@@ -109,8 +103,11 @@ const ModalAddProduct: React.FC<IModalProps> = ({
           placeholder="Digite o preço do produto "
         />
 
-        <CheckboxInput name="checkbox" options={checkboxOptions} />
+        <CheckBoxGroup>
+          <CheckboxInput name="height" options={checkboxHeight} />
 
+          <CheckboxInput name="width" options={checkboxWidth} />
+        </CheckBoxGroup>
         <button type="submit" data-testid="add-food-button">
           <p className="text">Adicionar Serviço</p>
           <div className="icon">

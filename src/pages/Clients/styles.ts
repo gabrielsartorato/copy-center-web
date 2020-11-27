@@ -116,7 +116,9 @@ export const ContainerTable = styled.table`
 
   tbody tr td button {
     display: flex;
+
     align-items: center;
+    justify-content: center;
 
     padding: 8px;
 

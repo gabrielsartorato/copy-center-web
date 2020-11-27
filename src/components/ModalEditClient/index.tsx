@@ -65,7 +65,7 @@ const ModalEditClient: React.FC<IModalProps> = ({
       <Form ref={formRef} onSubmit={handleSubmit} initialData={editingClient}>
         <h1>Editar Cliente</h1>
 
-        <Input name="client_name" placeholder="Nome do client" />
+        <Input name="client_name" placeholder="Nome do cliente" />
 
         <Input name="email" placeholder="Ex: email@email.com" />
 
@@ -78,7 +78,7 @@ const ModalEditClient: React.FC<IModalProps> = ({
         />
 
         <button type="submit">
-          <div className="text">Editar Prato</div>
+          <div className="text">Editar Cliente</div>
           <div className="icon">
             <FiCheckSquare size={24} />
           </div>

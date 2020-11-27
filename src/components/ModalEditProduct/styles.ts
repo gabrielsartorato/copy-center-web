@@ -26,6 +26,56 @@ export const Form = styled(Unform)`
     font-weight: 600;
     border-radius: 8px;
     border: 0;
+    background: #39b100;
+    color: #fff;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    .text {
+      padding: 16px 24px;
+    }
+
+    .icon {
+      display: flex;
+      padding: 16px 16px;
+      background: #41c900;
+      border-radius: 0 8px 8px 0;
+      margin: 0 auto;
+    }
+  }
+
+  div {
+    display: flex;
+    label {
+      display: flex;
+    }
+    label + label {
+      margin-left: 16px;
+    }
+  }
+
+  input[type='checkbox'] {
+    width: 24px;
+    height: 24px;
+
+    margin-right: 8px;
+  }
+
+  input + input {
+    margin-right: 16px;
+  }
+
+  button {
+    margin-top: 48px;
+    align-self: flex-end;
+  }
+
+  button {
+    font-weight: 600;
+    border-radius: 8px;
+    border: 0;
     background: #4caf50;
     color: #fff;
 

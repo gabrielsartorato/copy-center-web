@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import SelectSearch from 'react-select-search';
+import { FiEdit } from 'react-icons/fi';
 import NavigateDrawer from '../../components/NavigateDrawer';
 
 import ModalAddProduct from '../../components/ModalAddProduct';
@@ -13,8 +14,9 @@ import {
 } from './styles';
 import api from '../../services/api';
 import { useAuth } from '../../hooks/auth';
+import ModalEditProduct from '../../components/ModalEditProduct';
 
-interface Products {
+interface IProduct {
   id: string;
   product_name: string;
   price: number;
@@ -27,8 +29,11 @@ interface Products {
 const Products: React.FC = () => {
   const { signOut } = useAuth();
 
-  const [products, setProducts] = useState<Products[]>([]);
-  const [speficProduct, setSpeficProduct] = useState<Products>();
+  const [products, setProducts] = useState<IProduct[]>([]);
+  const [speficProduct, setSpeficProduct] = useState<IProduct>();
+  const [editingProduct, setEditingProduct] = useState<IProduct>(
+    {} as IProduct,
+  );
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalEditOpen, setModalEditOpen] = useState(false);
@@ -49,9 +54,50 @@ const Products: React.FC = () => {
     setModalOpen(!modalOpen);
   }, [modalOpen]);
 
-  async function handleAddProducts(data: any): Promise<void> {
-    console.log('testestring');
-  }
+  const toggleEditModal = useCallback(() => {
+    setModalEditOpen(!modalEditOpen);
+  }, [modalEditOpen]);
+
+  const handleAddProducts = useCallback(
+    (data: any) => {
+      setProducts([...products, data]);
+    },
+    [products],
+  );
+
+  const handleSelectProduct = useCallback(
+    (e) => {
+      api
+        .get(`/products/${e}`)
+        .then((response) => {
+          setSpeficProduct(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+          signOut();
+        });
+    },
+    [signOut],
+  );
+
+  const editProdut = useCallback(
+    (product: IProduct) => {
+      setEditingProduct(product);
+      toggleEditModal();
+    },
+    [toggleEditModal],
+  );
+
+  const handleEditProduct = useCallback(
+    (data: IProduct) => {
+      const findIndex = products.findIndex((product) => product.id === data.id);
+
+      products[findIndex] = data;
+
+      setProducts([...products]);
+    },
+    [products],
+  );
 
   const selectOptionProducts = useMemo(() => {
     return products.map((product) => ({
@@ -100,6 +146,12 @@ const Products: React.FC = () => {
           setIsOpen={toggleAddModal}
           handleAddProduct={handleAddProducts}
         />
+        <ModalEditProduct
+          isOpen={modalEditOpen}
+          setIsOpen={toggleEditModal}
+          editingProduct={editingProduct}
+          handleUpdateProduct={handleEditProduct}
+        />
         <SearchProduct
           modalCreateOpen={modalOpen}
           modalEditOpen={modalEditOpen}
@@ -107,9 +159,12 @@ const Products: React.FC = () => {
           <SelectSearch
             options={selectOptionProducts}
             placeholder="Escolha o serviço"
+            onChange={(e) => handleSelectProduct(e)}
             search
           />
-          <button type="button">Limpar</button>
+          <button type="button" onClick={() => setSpeficProduct(undefined)}>
+            Limpar
+          </button>
         </SearchProduct>
         <ContainerTable>
           <thead>
@@ -122,26 +177,38 @@ const Products: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {formatProduts ? (
+            {specificFormatedProduct ? (
+              <tr>
+                <td>{specificFormatedProduct.product_name}</td>
+                <td>{specificFormatedProduct.formatedPrice}</td>
+                <td>{specificFormatedProduct.formatedHeight}</td>
+                <td>{specificFormatedProduct.formatedWidth}</td>
+                <td>
+                  <button
+                    type="button"
+                    onClick={() => editProdut(specificFormatedProduct)}
+                  >
+                    <FiEdit />
+                    Editar
+                  </button>
+                </td>
+              </tr>
+            ) : (
               formatProduts.map((product) => (
-                <tr>
+                <tr key={product.id}>
                   <td>{product.product_name}</td>
                   <td>{product.formatedPrice}</td>
                   <td>{product.formatedHeight}</td>
                   <td>{product.formatedWidth}</td>
+                  <td>
+                    <button type="button" onClick={() => editProdut(product)}>
+                      <FiEdit />
+                      Editar
+                    </button>
+                  </td>
                 </tr>
               ))
-            ) : (
-              <tr>
-                <td>Não há serviços cadastrados</td>
-              </tr>
             )}
-            {/* <tr>
-              <td>Nome</td>
-              <td>Cpf/Cnpj</td>
-              <td>Email</td>
-              <td>Telefone</td>
-            </tr> */}
           </tbody>
         </ContainerTable>
       </Content>
