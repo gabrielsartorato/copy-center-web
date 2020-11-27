@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import SelectSearch from 'react-select-search';
 import NavigateDrawer from '../../components/NavigateDrawer';
 
@@ -11,16 +11,39 @@ import {
   SearchProduct,
   ContainerTable,
 } from './styles';
+import api from '../../services/api';
+import { useAuth } from '../../hooks/auth';
+
+interface Products {
+  id: string;
+  product_name: string;
+  price: number;
+  use_height: number;
+  use_width: number;
+  created_at: Date;
+  updated_at: Date;
+}
 
 const Products: React.FC = () => {
-  const [products, setProducts] = useState([]);
+  const { signOut } = useAuth();
+
+  const [products, setProducts] = useState<Products[]>([]);
+  const [speficProduct, setSpeficProduct] = useState<Products>();
+
   const [modalOpen, setModalOpen] = useState(false);
   const [modalEditOpen, setModalEditOpen] = useState(false);
 
-  const options = [
-    { name: 'Swedish', value: 'sv' },
-    { name: 'English', value: 'en' },
-  ];
+  useEffect(() => {
+    api
+      .get('/products')
+      .then((response) => {
+        setProducts(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+        signOut();
+      });
+  }, [signOut]);
 
   const toggleAddModal = useCallback(() => {
     setModalOpen(!modalOpen);
@@ -29,6 +52,39 @@ const Products: React.FC = () => {
   async function handleAddProducts(data: any): Promise<void> {
     console.log('testestring');
   }
+
+  const selectOptionProducts = useMemo(() => {
+    return products.map((product) => ({
+      value: product.id,
+      name: product.product_name,
+    }));
+  }, [products]);
+
+  const formatProduts = useMemo(() => {
+    return products.map((product) => {
+      return Object.assign(product, {
+        formatedPrice: Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+        }).format(product.price),
+        formatedHeight: product.use_height === 1 ? 'Sim' : 'Não',
+        formatedWidth: product.use_width === 1 ? 'Sim' : 'Não',
+      });
+    });
+  }, [products]);
+
+  const specificFormatedProduct = useMemo(() => {
+    return speficProduct
+      ? Object.assign(speficProduct, {
+          formatedPrice: Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+          }).format(speficProduct.price),
+          formatedHeight: speficProduct.use_height === 1 ? 'Sim' : 'Não',
+          formatedWidth: speficProduct.use_width === 1 ? 'Sim' : 'Não',
+        })
+      : null;
+  }, [speficProduct]);
 
   return (
     <Container>
@@ -49,7 +105,7 @@ const Products: React.FC = () => {
           modalEditOpen={modalEditOpen}
         >
           <SelectSearch
-            options={options}
+            options={selectOptionProducts}
             placeholder="Escolha o serviço"
             search
           />
@@ -62,12 +118,22 @@ const Products: React.FC = () => {
               <th>Preço</th>
               <th>Altura</th>
               <th>Largura</th>
+              <th>Ações</th>
             </tr>
           </thead>
           <tbody>
-            {!products && (
+            {formatProduts ? (
+              formatProduts.map((product) => (
+                <tr>
+                  <td>{product.product_name}</td>
+                  <td>{product.formatedPrice}</td>
+                  <td>{product.formatedHeight}</td>
+                  <td>{product.formatedWidth}</td>
+                </tr>
+              ))
+            ) : (
               <tr>
-                <td>Sem Produtos Cadastrados</td>
+                <td>Não há serviços cadastrados</td>
               </tr>
             )}
             {/* <tr>
