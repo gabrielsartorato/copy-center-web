@@ -2,11 +2,16 @@ import React, { useRef, useCallback } from 'react';
 
 import { FiCheckSquare } from 'react-icons/fi';
 import { FormHandles } from '@unform/core';
+import * as Yup from 'yup';
 import { Form, CheckBoxGroup } from './styles';
-import Modal from '../Modal';
-import Input from '../Input';
-import api from '../../services/api';
-import CheckboxInput from '../InputCheckBox';
+
+import Modal from '../../../../components/Modal';
+import Input from '../../../../components/Input';
+import CheckboxInput from '../../../../components/InputCheckBox';
+
+import api from '../../../../services/api';
+import getValidationErrors from '../../../../utils/getValidationErros';
+import { useToast } from '../../../../hooks/toast';
 
 interface IProduct {
   id: string;
@@ -52,6 +57,7 @@ const ModalEditProduct: React.FC<IModalProps> = ({
   handleUpdateProduct,
 }) => {
   const formRef = useRef<FormHandles>(null);
+  const { addToast } = useToast();
 
   const checkboxHeight: CheckboxOption[] = [
     { id: 'height', value: 'height', label: 'Altura' },
@@ -63,24 +69,55 @@ const ModalEditProduct: React.FC<IModalProps> = ({
 
   const handleSubmit = useCallback(
     async (data: IEditProduct) => {
-      const formatValue = data.formatedPrice.replace(/[^\d]+/g, '') / 100;
+      try {
+        const formatValue = data.formatedPrice.replace(/[^\d]+/g, '') / 100;
 
-      const dataForm = {
-        product_name: data.product_name,
-        price: formatValue,
-        use_height: data.height[0] ? 1 : 0,
-        use_width: data.width[0] ? 1 : 0,
-      };
+        const schema = Yup.object().shape({
+          product_name: Yup.string().required('Nome obrigatório'),
+          formatedPrice: Yup.string().required('Preço obrigatório'),
+        });
 
-      const response = await api.put(
-        `/products/${editingProduct.id}`,
-        dataForm,
-      );
+        await schema.validate(data, {
+          abortEarly: false,
+        });
 
-      handleUpdateProduct(response.data);
-      setIsOpen();
+        const dataForm = {
+          product_name: data.product_name,
+          price: formatValue,
+          use_height: data.height[0] ? 1 : 0,
+          use_width: data.width[0] ? 1 : 0,
+        };
+
+        const response = await api.put(
+          `/products/${editingProduct.id}`,
+          dataForm,
+        );
+
+        handleUpdateProduct(response.data);
+        setIsOpen();
+      } catch (error) {
+        if (error instanceof Yup.ValidationError) {
+          const errors = getValidationErrors(error);
+
+          formRef.current?.setErrors(errors);
+
+          console.log(errors);
+          return;
+        }
+
+        console.log(error.response.data);
+
+        setIsOpen();
+
+        addToast({
+          type: 'error',
+          title: 'Erro ao fazer o cadastro',
+          description:
+            'Ocorreu um erro ao tentar fazer o cadastro, cliente já existente.',
+        });
+      }
     },
-    [handleUpdateProduct, editingProduct, setIsOpen],
+    [handleUpdateProduct, editingProduct, setIsOpen, addToast],
   );
 
   return (

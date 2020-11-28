@@ -3,7 +3,8 @@ import SelectSearch from 'react-select-search';
 import { FiEdit } from 'react-icons/fi';
 import NavigateDrawer from '../../components/NavigateDrawer';
 
-import ModalAddProduct from '../../components/ModalAddProduct';
+import ModalAddProduct from './Components/ModalAddProduct';
+import ModalEditProduct from './Components/ModalEditProduct';
 
 import {
   Container,
@@ -14,7 +15,6 @@ import {
 } from './styles';
 import api from '../../services/api';
 import { useAuth } from '../../hooks/auth';
-import ModalEditProduct from '../../components/ModalEditProduct';
 
 interface IProduct {
   id: string;

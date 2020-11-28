@@ -8,7 +8,8 @@ import { cpfMask } from '../../masks/cpfMask';
 import { useAuth } from '../../hooks/auth';
 
 import NavigateDrawer from '../../components/NavigateDrawer';
-import ModalAddClient from '../../components/ModalAddClient';
+import ModalAddClient from './Components/ModalAddClient';
+import ModalEditClient from './Components/ModalEditClient';
 
 import {
   Container,
@@ -19,7 +20,6 @@ import {
 } from './styles';
 
 import './stylescss.css';
-import ModalEditClient from '../../components/ModalEditClient';
 
 interface IClientResponse {
   id: string;

@@ -5,12 +5,13 @@ import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
 import { Form } from './styles';
 
-import Modal from '../Modal';
-import Input from '../Input';
+import { useToast } from '../../../../hooks/toast';
 
-import api from '../../services/api';
-import getValidationErrors from '../../utils/getValidationErros';
-import { useToast } from '../../hooks/toast';
+import Modal from '../../../../components/Modal';
+import Input from '../../../../components/Input';
+
+import api from '../../../../services/api';
+import getValidationErrors from '../../../../utils/getValidationErros';
 
 interface IClient {
   id: string;

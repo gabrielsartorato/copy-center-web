@@ -5,13 +5,14 @@ import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
 import { Form, CheckBoxGroup } from './styles';
 
-import Modal from '../Modal';
-import Input from '../Input';
+import { useToast } from '../../../../hooks/toast';
 
-import api from '../../services/api';
-import getValidationErrors from '../../utils/getValidationErros';
-import { useToast } from '../../hooks/toast';
-import CheckboxInput from '../InputCheckBox';
+import Modal from '../../../../components/Modal';
+import Input from '../../../../components/Input';
+import CheckboxInput from '../../../../components/InputCheckBox';
+
+import api from '../../../../services/api';
+import getValidationErrors from '../../../../utils/getValidationErros';
 
 interface IProduct {
   id: string;
@@ -44,6 +45,15 @@ const ModalAddProduct: React.FC<IModalProps> = ({
     async (data: any) => {
       try {
         const formatValue = data.price.replace(/[^\d]+/g, '') / 100;
+
+        const schema = Yup.object().shape({
+          product_name: Yup.string().required('Nome obrigatório'),
+          price: Yup.string().required('Preço obrigatório'),
+        });
+
+        await schema.validate(data, {
+          abortEarly: false,
+        });
 
         const dataForm = {
           product_name: data.product_name,
