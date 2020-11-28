@@ -111,17 +111,11 @@ const Clients: React.FC = () => {
 
   const handleSelecChange = useCallback(
     (e) => {
-      api
-        .get(`clients/${e}`)
-        .then((response) => {
-          setSpecificClient(response.data);
-        })
-        .catch((error) => {
-          console.log(error);
-          signOut();
-        });
+      const findClient = clients.find((client) => client.id === e);
+
+      setSpecificClient(findClient);
     },
-    [signOut],
+    [clients],
   );
 
   const parsedClients = useMemo(() => {
