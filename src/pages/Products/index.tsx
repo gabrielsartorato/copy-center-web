@@ -67,17 +67,11 @@ const Products: React.FC = () => {
 
   const handleSelectProduct = useCallback(
     (e) => {
-      api
-        .get(`/products/${e}`)
-        .then((response) => {
-          setSpeficProduct(response.data);
-        })
-        .catch((error) => {
-          console.log(error);
-          signOut();
-        });
+      const productFind = products.find((product) => product.id === e);
+
+      setSpeficProduct(productFind);
     },
-    [signOut],
+    [products],
   );
 
   const editProdut = useCallback(
