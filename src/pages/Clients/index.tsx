@@ -69,30 +69,31 @@ const Clients: React.FC = () => {
       });
   }, [signOut]);
 
-  async function handleAddClient(data: IClientResponse): Promise<void> {
-    setClients([...clients, data]);
-  }
+  const handleAddClient = useCallback(
+    async (data: IClientResponse) => {
+      setClients([...clients, data]);
+    },
+    [clients],
+  );
 
-  async function handleUpdateClient(data: any): Promise<void> {
-    const findIndex = clients.findIndex((client) => client.id === data.id);
+  const handleUpdateClient = useCallback(
+    async (data: any) => {
+      const findIndex = clients.findIndex((client) => client.id === data.id);
 
-    clients[findIndex] = data;
+      clients[findIndex] = data;
 
-    setClients([...clients]);
-  }
+      setClients([...clients]);
+    },
+    [clients],
+  );
 
-  function editClient(client: IEditClient): void {
-    setEditingClient(client);
-    toggleOpenEditModal();
-  }
-
-  function toggleModal(): void {
+  const toggleModal = useCallback(() => {
     setModalOpen(!modalOpen);
-  }
+  }, [modalOpen]);
 
-  function toggleOpenEditModal(): void {
+  const toggleOpenEditModal = useCallback(() => {
     setModalEditOpen(!modalEditOpen);
-  }
+  }, [modalEditOpen]);
 
   const handleInativeClient = useCallback(
     async (id: string, status: number) => {
@@ -107,6 +108,14 @@ const Clients: React.FC = () => {
       setClients([...clients]);
     },
     [clients],
+  );
+
+  const editClient = useCallback(
+    (client: IEditClient) => {
+      setEditingClient(client);
+      toggleOpenEditModal();
+    },
+    [toggleOpenEditModal],
   );
 
   const handleSelecChange = useCallback(
