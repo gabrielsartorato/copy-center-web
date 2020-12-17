@@ -5,6 +5,7 @@ import SigniIn from '../pages/SignIn';
 import Dashboard from '../pages/DashBoard';
 import Clients from '../pages/Clients';
 import Products from '../pages/Products';
+import Seller from '../pages/Seller';
 
 import Route from './Route';
 
@@ -15,6 +16,7 @@ const Routes: React.FC = () => (
     <Route path="/dashboard" component={Dashboard} isPrivate />
     <Route path="/clients" component={Clients} isPrivate />
     <Route path="/products" component={Products} isPrivate />
+    <Route path="/seller" component={Seller} isPrivate />
   </Switch>
 );
 

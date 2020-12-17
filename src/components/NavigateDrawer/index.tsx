@@ -41,7 +41,7 @@ const NavigateDrawer: React.FC = () => {
           <FiUser />
           Clientes
         </NavigateLink>
-        <NavigateLink name="/vendas" path={pathname} to="/">
+        <NavigateLink name="/seller" path={pathname} to="/seller">
           <FiCreditCard />
           Vendas
         </NavigateLink>

@@ -141,6 +141,8 @@ export const ContainerTable = styled.table`
   tbody tr td button[name='inative'] {
     background: red;
 
+    margin-left: 8px;
+
     border-radius: 8px;
     padding: 8px;
 
