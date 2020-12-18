@@ -40,7 +40,7 @@
   width: 100%;
   padding: 0 16px;
   background: #fff;
-  border: 1px solid transparent;
+  border: 1px solid #000000;
   box-shadow: 0 .0625rem .125rem rgba(0, 0, 0, 0.15);
   border-radius: 10px;
   outline: none;

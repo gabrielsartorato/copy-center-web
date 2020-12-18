@@ -14,7 +14,14 @@ import NavigateDrawer from '../../components/NavigateDrawer';
 import { useAuth } from '../../hooks/auth';
 import api from '../../services/api';
 
-import { Container, Content, ContainerItems, ContainerSeller } from './styles';
+import {
+  Container,
+  Content,
+  ContainerClientAndProducts,
+  ContainerClient,
+  ContainerItems,
+  ContainerSeller,
+} from './styles';
 
 import './stylescss.css';
 
@@ -28,10 +35,24 @@ interface IProduct {
   updated_at: Date;
 }
 
+interface IClient {
+  id: string;
+  client_name: string;
+  cpf_cnpj: string;
+  email: string;
+  status: number;
+  user_id: string;
+  phone_number: string;
+  created_at: string;
+}
+
 const Seller: React.FC = () => {
   const { signOut } = useAuth();
   const [products, setProducts] = useState<IProduct[]>([]);
+  const [clients, setClients] = useState<IClient[]>([]);
+  const [specifClient, setSpecifcClient] = useState<IClient>();
   const [speficProduct, setSpeficProduct] = useState<IProduct>();
+  const [cart, setCart] = useState<IProduct[]>([]);
   const formRef = useRef<FormHandles>(null);
 
   useEffect(() => {
@@ -39,6 +60,18 @@ const Seller: React.FC = () => {
       .get('/products')
       .then((response) => {
         setProducts(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+        signOut();
+      });
+  }, [signOut]);
+
+  useEffect(() => {
+    api
+      .get('/clients')
+      .then((response) => {
+        setClients(response.data.clients);
       })
       .catch((error) => {
         console.log(error);
@@ -62,6 +95,14 @@ const Seller: React.FC = () => {
     }));
   }, [products]);
 
+  const optionsSelect = useMemo(() => {
+    const activeClients = clients.filter((client) => client.status !== 0);
+    return activeClients.map((client) => ({
+      value: client.id,
+      name: client.client_name,
+    }));
+  }, [clients]);
+
   const handleSubmitFormProduct = useCallback(
     async (data) => {
       console.log(data, speficProduct);
@@ -69,35 +110,121 @@ const Seller: React.FC = () => {
     [speficProduct],
   );
 
+  const handleSpecifcClient = useCallback(
+    (e) => {
+      const specific = clients.find((client) => client.id === e);
+      setSpecifcClient(specific);
+    },
+    [clients],
+  );
+
   return (
     <Container>
       <NavigateDrawer />
       <Content>
-        <ContainerItems>
-          <section>
+        <ContainerClientAndProducts>
+          <ContainerClient>
             <SelectSearch
               className="select-products"
-              options={selectOptionProducts}
-              onChange={(e) => handleSelectProduct(e)}
+              options={optionsSelect}
+              onChange={(e) => handleSpecifcClient(e)}
               placeholder="Selecione o produto"
               search
             />
+          </ContainerClient>
+          <ContainerItems>
+            <section>
+              <SelectSearch
+                className="select-products"
+                options={selectOptionProducts}
+                onChange={(e) => handleSelectProduct(e)}
+                placeholder="Selecione o produto"
+                search
+              />
 
-            <Form ref={formRef} onSubmit={handleSubmitFormProduct}>
-              <div id="input-group">
-                <Input name="width" placeholder="Comprimento" />
-                <Input name="height" placeholder="Largura" />
-                <Input
-                  className="input-quantity"
-                  name="quantity"
-                  placeholder="Quantidade"
-                />
-              </div>
-              <button type="submit">Adicionar</button>
-            </Form>
-          </section>
-        </ContainerItems>
-        <ContainerSeller />
+              <Form ref={formRef} onSubmit={handleSubmitFormProduct}>
+                <div id="input-group">
+                  <Input name="width" placeholder="Comprimento" />
+                  <Input name="height" placeholder="Largura" />
+                  <Input
+                    className="input-quantity"
+                    name="quantity"
+                    placeholder="Quantidade"
+                  />
+                </div>
+                <button name="add-product" type="submit">
+                  Adicionar Produto
+                </button>
+              </Form>
+            </section>
+          </ContainerItems>
+        </ContainerClientAndProducts>
+        <ContainerSeller>
+          <header>{specifClient?.client_name}</header>
+          <p>-----------------------------------------------------------</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Qtd</th>
+                <th>Produto</th>
+                <th>Preço</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>Plotagem preto e branco</td>
+                <td>R$ 1800,00</td>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td>Plotagem preto e branco</td>
+                <td>R$ 1800,00</td>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td>Plotagem preto e branco</td>
+                <td>R$ 1800,00</td>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td>Plotagem preto e branco</td>
+                <td>R$ 1800,00</td>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td>Plotagem preto e branco</td>
+                <td>R$ 1800,00</td>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td>Plotagem preto e branco</td>
+                <td>R$ 1800,00</td>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td>Plotagem preto e branco</td>
+                <td>R$ 1800,00</td>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td>Plotagem preto e branco</td>
+                <td>R$ 1800,00</td>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td>Plotagem preto e branco</td>
+                <td>R$ 1800,00</td>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td>Plotagem preto e branco</td>
+                <td>R$ 1800,00</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>-----------------------------------------------------------</p>
+        </ContainerSeller>
       </Content>
     </Container>
   );
