@@ -78,8 +78,8 @@ export const ContainerItems = styled.div`
         margin-left: 16px;
       }
 
-      div:nth-last-child(1) {
-        width: 312px;
+      div:nth-last-child(2) {
+        width: 400px;
       }
     }
   }

@@ -14,6 +14,8 @@ import NavigateDrawer from '../../components/NavigateDrawer';
 import { useAuth } from '../../hooks/auth';
 import api from '../../services/api';
 
+import formatValue from '../../masks/moneyMask';
+
 import {
   Container,
   Content,
@@ -31,6 +33,7 @@ interface IProduct {
   price: number;
   use_height: number;
   use_width: number;
+  formatPrice: string;
   created_at: Date;
   updated_at: Date;
 }
@@ -59,7 +62,11 @@ const Seller: React.FC = () => {
     api
       .get('/products')
       .then((response) => {
-        setProducts(response.data);
+        const formatProducts = response.data.map((product: IProduct) => ({
+          ...product,
+          formatPrice: formatValue(product.price),
+        }));
+        setProducts(formatProducts);
       })
       .catch((error) => {
         console.log(error);
@@ -78,6 +85,10 @@ const Seller: React.FC = () => {
         signOut();
       });
   }, [signOut]);
+
+  useEffect(() => {
+    formRef.current?.setData({ price: speficProduct?.formatPrice });
+  }, [speficProduct]);
 
   const handleSelectProduct = useCallback(
     (e) => {
@@ -105,7 +116,20 @@ const Seller: React.FC = () => {
 
   const handleSubmitFormProduct = useCallback(
     async (data) => {
-      console.log(data, speficProduct);
+      const formatPrice = data.price.replace(/[^\d]+/g, '');
+      const totalPrice =
+        data.width && data.height
+          ? (data.width * data.height * formatPrice * data.quantity) / 100
+          : (data.quantity * formatPrice) / 100;
+
+      console.log(totalPrice);
+
+      const formatProduct = {
+        ...speficProduct,
+        price: totalPrice,
+      };
+
+      console.log(formatProduct);
     },
     [speficProduct],
   );
@@ -150,6 +174,11 @@ const Seller: React.FC = () => {
                     className="input-quantity"
                     name="quantity"
                     placeholder="Quantidade"
+                  />
+                  <Input
+                    mask="price"
+                    name="price"
+                    placeholder="Preço Unitário"
                   />
                 </div>
                 <button name="add-product" type="submit">
