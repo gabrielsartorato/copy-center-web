@@ -17,8 +17,6 @@ export const Content = styled.div`
 export const ContainerClientAndProducts = styled.div`
   display: flex;
   flex-direction: column;
-
-  position: absolute;
 `;
 
 export const ContainerClient = styled.div`
@@ -86,35 +84,30 @@ export const ContainerItems = styled.div`
 `;
 
 export const ContainerSeller = styled.div`
-  position: absolute;
-  max-width: 400px;
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  /* position: absolute;
+  left: 810px; */
+  margin-left: 16px;
 
-  left: 810px;
+  max-width: 420px;
+  width: 100%;
 
   border-radius: 16px;
 
-  margin-left: 16px;
-
-  background: #fffaf0;
+  background: white;
 
   padding: 16px;
   color: #000000;
 
+  section {
+    padding: 8px;
+    border-radius: 16px;
+    background: #f9f7db;
+  }
   header {
     font-size: 24px;
-  }
-
-  .header-seller {
-    display: flex;
-
-    p + p {
-      margin-left: 32px;
-    }
-
-    p + p + p {
-      margin-left: 184px;
-    }
+    margin-bottom: 8px;
   }
 
   table td,

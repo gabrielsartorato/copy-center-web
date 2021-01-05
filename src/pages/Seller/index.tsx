@@ -9,6 +9,7 @@ import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 
 import SelectSearch from 'react-select-search';
+import { object } from 'yup';
 import Input from '../../components/Input';
 import NavigateDrawer from '../../components/NavigateDrawer';
 import { useAuth } from '../../hooks/auth';
@@ -34,6 +35,7 @@ interface IProduct {
   use_height: number;
   use_width: number;
   formatPrice: string;
+  quantity: number;
   created_at: Date;
   updated_at: Date;
 }
@@ -51,9 +53,9 @@ interface IClient {
 
 const Seller: React.FC = () => {
   const { signOut } = useAuth();
-  const [products, setProducts] = useState<IProduct[]>([]);
   const [clients, setClients] = useState<IClient[]>([]);
   const [specifClient, setSpecifcClient] = useState<IClient>();
+  const [products, setProducts] = useState<IProduct[]>([]);
   const [speficProduct, setSpeficProduct] = useState<IProduct>();
   const [cart, setCart] = useState<IProduct[]>([]);
   const formRef = useRef<FormHandles>(null);
@@ -114,25 +116,15 @@ const Seller: React.FC = () => {
     }));
   }, [clients]);
 
-  const handleSubmitFormProduct = useCallback(
-    async (data) => {
-      const formatPrice = data.price.replace(/[^\d]+/g, '');
-      const totalPrice =
-        data.width && data.height
-          ? (data.width * data.height * formatPrice * data.quantity) / 100
-          : (data.quantity * formatPrice) / 100;
+  const totalPrice = useMemo(() => {
+    const total = cart.reduce((acc, product) => {
+      return acc + product.price;
+    }, 0);
 
-      console.log(totalPrice);
+    return formatValue(String(total));
+  }, [cart]);
 
-      const formatProduct = {
-        ...speficProduct,
-        price: totalPrice,
-      };
-
-      console.log(formatProduct);
-    },
-    [speficProduct],
-  );
+  console.log(totalPrice);
 
   const handleSpecifcClient = useCallback(
     (e) => {
@@ -142,20 +134,37 @@ const Seller: React.FC = () => {
     [clients],
   );
 
+  const handleSubmitFormProduct = useCallback(
+    async (data) => {
+      const formatPrice = data.price.replace(/[^\d]+/g, '');
+      const price =
+        data.width && data.height
+          ? (data.width * data.height * formatPrice * data.quantity) / 100
+          : (data.quantity * formatPrice) / 100;
+
+      const formattedProduct = {
+        id: speficProduct!.id,
+        product_name: speficProduct!.product_name,
+        use_height: speficProduct!.use_height,
+        use_width: speficProduct!.use_width,
+        created_at: speficProduct!.created_at,
+        updated_at: speficProduct!.updated_at,
+        ...speficProduct,
+        price: price / 100,
+        formatPrice: formatValue(String(price)),
+        quantity: data.quantity,
+      };
+
+      setCart([...cart, formattedProduct]);
+    },
+    [speficProduct, cart],
+  );
+
   return (
     <Container>
       <NavigateDrawer />
       <Content>
         <ContainerClientAndProducts>
-          <ContainerClient>
-            <SelectSearch
-              className="select-products"
-              options={optionsSelect}
-              onChange={(e) => handleSpecifcClient(e)}
-              placeholder="Selecione o produto"
-              search
-            />
-          </ContainerClient>
           <ContainerItems>
             <section>
               <SelectSearch
@@ -168,8 +177,8 @@ const Seller: React.FC = () => {
 
               <Form ref={formRef} onSubmit={handleSubmitFormProduct}>
                 <div id="input-group">
-                  <Input name="width" placeholder="Comprimento" />
-                  <Input name="height" placeholder="Largura" />
+                  <Input name="width" placeholder="Comprimento em cm" />
+                  <Input name="height" placeholder="Largura em cm" />
                   <Input
                     className="input-quantity"
                     name="quantity"
@@ -189,70 +198,41 @@ const Seller: React.FC = () => {
           </ContainerItems>
         </ContainerClientAndProducts>
         <ContainerSeller>
-          <header>{specifClient?.client_name}</header>
-          <p>-----------------------------------------------------------</p>
-          <table>
-            <thead>
-              <tr>
-                <th>Qtd</th>
-                <th>Produto</th>
-                <th>Preço</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>1</td>
-                <td>Plotagem preto e branco</td>
-                <td>R$ 1800,00</td>
-              </tr>
-              <tr>
-                <td>1</td>
-                <td>Plotagem preto e branco</td>
-                <td>R$ 1800,00</td>
-              </tr>
-              <tr>
-                <td>1</td>
-                <td>Plotagem preto e branco</td>
-                <td>R$ 1800,00</td>
-              </tr>
-              <tr>
-                <td>1</td>
-                <td>Plotagem preto e branco</td>
-                <td>R$ 1800,00</td>
-              </tr>
-              <tr>
-                <td>1</td>
-                <td>Plotagem preto e branco</td>
-                <td>R$ 1800,00</td>
-              </tr>
-              <tr>
-                <td>1</td>
-                <td>Plotagem preto e branco</td>
-                <td>R$ 1800,00</td>
-              </tr>
-              <tr>
-                <td>1</td>
-                <td>Plotagem preto e branco</td>
-                <td>R$ 1800,00</td>
-              </tr>
-              <tr>
-                <td>1</td>
-                <td>Plotagem preto e branco</td>
-                <td>R$ 1800,00</td>
-              </tr>
-              <tr>
-                <td>1</td>
-                <td>Plotagem preto e branco</td>
-                <td>R$ 1800,00</td>
-              </tr>
-              <tr>
-                <td>1</td>
-                <td>Plotagem preto e branco</td>
-                <td>R$ 1800,00</td>
-              </tr>
-            </tbody>
-          </table>
-          <p>-----------------------------------------------------------</p>
+          <ContainerItems>
+            <ContainerClient>
+              <SelectSearch
+                className="select-products"
+                options={optionsSelect}
+                onChange={(e) => handleSpecifcClient(e)}
+                placeholder="Selecione o produto"
+                search
+              />
+            </ContainerClient>
+
+            <header>{specifClient?.client_name}</header>
+            <section>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Qtd</th>
+                    <th>Produto</th>
+                    <th>Preço</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cart.map((product) => (
+                    <tr key={product.id}>
+                      <td>{product.quantity}</td>
+                      <td>{product.product_name}</td>
+                      <td>{product.formatPrice}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p>-----------------------------------------------------------</p>
+              <p>{totalPrice}</p>
+            </section>
+          </ContainerItems>
         </ContainerSeller>
       </Content>
     </Container>
