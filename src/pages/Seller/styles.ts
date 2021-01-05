@@ -76,18 +76,25 @@ export const ContainerItems = styled.div`
         margin-left: 16px;
       }
 
-      div:nth-last-child(2) {
-        width: 400px;
+      div[name='price'] {
+        width: 500px;
+      }
+
+      div[name='quantity'] {
+        width: 350px;
       }
     }
   }
 `;
 
+export const ContainerCart = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
 export const ContainerSeller = styled.div`
   display: flex;
   flex-direction: column;
-  /* position: absolute;
-  left: 810px; */
   margin-left: 16px;
 
   max-width: 420px;
@@ -126,5 +133,35 @@ export const ContainerSeller = styled.div`
 
   table th:nth-child(3) {
     width: 20%;
+  }
+
+  button[name='end-seller'] {
+    margin-top: 8px;
+    width: 100%;
+    height: 48px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: #1976d2;
+
+    font-size: 24px;
+    font-weight: 400;
+    color: #ffffff;
+  }
+
+  button[name='clear-seller'] {
+    margin-top: 8px;
+    width: 100%;
+    height: 48px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: #ff4040;
+
+    font-size: 24px;
+    font-weight: 400;
+    color: #ffffff;
   }
 `;

@@ -5,11 +5,11 @@ import React, {
   useRef,
   useState,
 } from 'react';
+
 import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 
 import SelectSearch from 'react-select-search';
-import { object } from 'yup';
 import Input from '../../components/Input';
 import NavigateDrawer from '../../components/NavigateDrawer';
 import { useAuth } from '../../hooks/auth';
@@ -24,9 +24,12 @@ import {
   ContainerClient,
   ContainerItems,
   ContainerSeller,
+  ContainerCart,
 } from './styles';
 
 import './stylescss.css';
+import './payment.css';
+import { useToast } from '../../hooks/toast';
 
 interface IProduct {
   id: string;
@@ -36,6 +39,8 @@ interface IProduct {
   use_width: number;
   formatPrice: string;
   quantity: number;
+  height: number;
+  width: number;
   created_at: Date;
   updated_at: Date;
 }
@@ -51,10 +56,18 @@ interface IClient {
   created_at: string;
 }
 
+interface IPayment {
+  id: number;
+  payment_name: string;
+}
+
 const Seller: React.FC = () => {
   const { signOut } = useAuth();
+  const { addToast } = useToast();
+
   const [clients, setClients] = useState<IClient[]>([]);
   const [specifClient, setSpecifcClient] = useState<IClient>();
+  const [payments, setPayments] = useState<IPayment[]>([]);
   const [products, setProducts] = useState<IProduct[]>([]);
   const [speficProduct, setSpeficProduct] = useState<IProduct>();
   const [cart, setCart] = useState<IProduct[]>([]);
@@ -89,6 +102,17 @@ const Seller: React.FC = () => {
   }, [signOut]);
 
   useEffect(() => {
+    api
+      .get('/payments')
+      .then((response) => {
+        setPayments(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+        signOut();
+      });
+  }, [signOut]);
+  useEffect(() => {
     formRef.current?.setData({ price: speficProduct?.formatPrice });
   }, [speficProduct]);
 
@@ -116,6 +140,13 @@ const Seller: React.FC = () => {
     }));
   }, [clients]);
 
+  const optionsSelectPayment = useMemo(() => {
+    return payments.map((payment) => ({
+      value: String(payment.id),
+      name: payment.payment_name,
+    }));
+  }, [payments]);
+
   const totalPrice = useMemo(() => {
     const total = cart.reduce((acc, product) => {
       return acc + product.price;
@@ -123,8 +154,6 @@ const Seller: React.FC = () => {
 
     return formatValue(String(total));
   }, [cart]);
-
-  console.log(totalPrice);
 
   const handleSpecifcClient = useCallback(
     (e) => {
@@ -153,12 +182,45 @@ const Seller: React.FC = () => {
         price: price / 100,
         formatPrice: formatValue(String(price)),
         quantity: data.quantity,
+        height: data.height,
+        width: data.width,
       };
+
+      if (!data.quantity) {
+        addToast({
+          type: 'error',
+          title: 'Erro ao inserir produto',
+          description:
+            'Ocorreu um erro ao tentar inserir o produto, campo quantidade obritatório',
+        });
+
+        return;
+      }
+
+      if (speficProduct!.use_height === 1 || speficProduct!.use_width === 1) {
+        if (!formattedProduct.height || !formattedProduct.width) {
+          addToast({
+            type: 'error',
+            title: 'Erro ao inserir produto',
+            description:
+              'Ocorreu um erro ao tentar inserir o produto, campo obritatório',
+          });
+          return;
+        }
+      }
 
       setCart([...cart, formattedProduct]);
     },
-    [speficProduct, cart],
+    [speficProduct, cart, addToast],
   );
+
+  const handleClearCart = useCallback(() => {
+    setCart([]);
+  }, []);
+
+  const handleSubmitCart = useCallback(() => {
+    console.log('aqui');
+  }, []);
 
   return (
     <Container>
@@ -177,18 +239,26 @@ const Seller: React.FC = () => {
 
               <Form ref={formRef} onSubmit={handleSubmitFormProduct}>
                 <div id="input-group">
-                  <Input name="width" placeholder="Comprimento em cm" />
-                  <Input name="height" placeholder="Largura em cm" />
-                  <Input
-                    className="input-quantity"
-                    name="quantity"
-                    placeholder="Quantidade"
-                  />
                   <Input
                     mask="price"
                     name="price"
                     placeholder="Preço Unitário"
                   />
+                  <Input
+                    className="input-quantity"
+                    name="quantity"
+                    placeholder="Quantidade"
+                  />
+                  {speficProduct?.use_height ? (
+                    <Input name="width" placeholder="Comprimento em cm" />
+                  ) : (
+                    <span />
+                  )}
+                  {speficProduct?.use_width ? (
+                    <Input name="height" placeholder="Largura em cm" />
+                  ) : (
+                    <span />
+                  )}
                 </div>
                 <button name="add-product" type="submit">
                   Adicionar Produto
@@ -197,14 +267,14 @@ const Seller: React.FC = () => {
             </section>
           </ContainerItems>
         </ContainerClientAndProducts>
-        <ContainerSeller>
-          <ContainerItems>
+        <ContainerCart>
+          <ContainerSeller>
             <ContainerClient>
               <SelectSearch
                 className="select-products"
                 options={optionsSelect}
                 onChange={(e) => handleSpecifcClient(e)}
-                placeholder="Selecione o produto"
+                placeholder="Selecione o cliente"
                 search
               />
             </ContainerClient>
@@ -232,8 +302,23 @@ const Seller: React.FC = () => {
               <p>-----------------------------------------------------------</p>
               <p>{totalPrice}</p>
             </section>
-          </ContainerItems>
-        </ContainerSeller>
+
+            <SelectSearch
+              className="select-payment"
+              options={optionsSelectPayment}
+              onChange={(e) => handleSpecifcClient(e)}
+              placeholder="Selecione a forma de pagamento"
+              search
+            />
+
+            <button onClick={handleSubmitCart} name="end-seller" type="button">
+              Salvar
+            </button>
+            <button onClick={handleClearCart} name="clear-seller" type="button">
+              Limpar
+            </button>
+          </ContainerSeller>
+        </ContainerCart>
       </Content>
     </Container>
   );
