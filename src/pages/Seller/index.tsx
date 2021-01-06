@@ -10,6 +10,7 @@ import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 
 import SelectSearch from 'react-select-search';
+import { v4 } from 'uuid';
 import Input from '../../components/Input';
 import NavigateDrawer from '../../components/NavigateDrawer';
 import { useAuth } from '../../hooks/auth';
@@ -33,6 +34,7 @@ import { useToast } from '../../hooks/toast';
 
 interface IProduct {
   id: string;
+  product_id: string;
   product_name: string;
   price: number;
   use_height: number;
@@ -43,6 +45,7 @@ interface IProduct {
   width: number;
   created_at: Date;
   updated_at: Date;
+  id_map: string;
 }
 
 interface IClient {
@@ -59,6 +62,12 @@ interface IClient {
 interface IPayment {
   id: number;
   payment_name: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+interface IPaymentStatus {
+  id: number;
 }
 
 const Seller: React.FC = () => {
@@ -68,6 +77,8 @@ const Seller: React.FC = () => {
   const [clients, setClients] = useState<IClient[]>([]);
   const [specifClient, setSpecifcClient] = useState<IClient>();
   const [payments, setPayments] = useState<IPayment[]>([]);
+  const [specifPayment, setSpecifPayment] = useState<IPayment>();
+  const [paymentStatus, setPaymentStatus] = useState<IPaymentStatus>();
   const [products, setProducts] = useState<IProduct[]>([]);
   const [speficProduct, setSpeficProduct] = useState<IProduct>();
   const [cart, setCart] = useState<IProduct[]>([]);
@@ -163,27 +174,40 @@ const Seller: React.FC = () => {
     [clients],
   );
 
+  const handleSelectSpecifPayment = useCallback(
+    (e) => {
+      const specific = payments.find((payment) => payment.id === Number(e));
+      setSpecifPayment(specific);
+    },
+    [payments],
+  );
+
+  const handleSelectPaymentStatus = useCallback((e) => {
+    setPaymentStatus(e);
+  }, []);
+
   const handleSubmitFormProduct = useCallback(
     async (data) => {
       const formatPrice = data.price.replace(/[^\d]+/g, '');
       const price =
         data.width && data.height
           ? (data.width * data.height * formatPrice * data.quantity) / 100
-          : (data.quantity * formatPrice) / 100;
+          : data.quantity * formatPrice;
 
       const formattedProduct = {
         id: speficProduct!.id,
+        product_id: speficProduct!.id,
         product_name: speficProduct!.product_name,
         use_height: speficProduct!.use_height,
         use_width: speficProduct!.use_width,
         created_at: speficProduct!.created_at,
         updated_at: speficProduct!.updated_at,
-        ...speficProduct,
-        price: price / 100,
+        price,
         formatPrice: formatValue(String(price)),
         quantity: data.quantity,
-        height: data.height,
-        width: data.width,
+        height: data.height || 0,
+        width: data.width || 0,
+        id_map: v4(),
       };
 
       if (!data.quantity) {
@@ -216,11 +240,89 @@ const Seller: React.FC = () => {
 
   const handleClearCart = useCallback(() => {
     setCart([]);
+    setSpecifcClient({} as IClient);
+    setSpecifPayment({} as IPayment);
+    setPaymentStatus({} as IPaymentStatus);
   }, []);
 
-  const handleSubmitCart = useCallback(() => {
-    console.log('aqui');
+  const handleValidate = useCallback(async (data) => {
+    let error = 0;
+    let message = '';
+
+    if (!data.client_id) {
+      message = 'cliente';
+      error = 1;
+    }
+
+    if (!data.payment_id) {
+      message = 'tipo de pagamento';
+
+      error = 1;
+    }
+
+    console.log(data.payment_status);
+    if (!data.payment_status) {
+      message = 'status de pagamento';
+
+      error = 1;
+    }
+
+    if (data.products.length === 0) {
+      message = 'produtos';
+
+      error = 1;
+    }
+
+    return {
+      message,
+      error,
+    };
   }, []);
+
+  const handleSubmitCart = useCallback(async () => {
+    const formData = {
+      client_id: specifClient?.id,
+      payment_id: specifPayment?.id,
+      payment_status: Number(paymentStatus),
+      total_price: Number(totalPrice.replace(/[^\d]+/g, '')) / 100,
+      description: 'teste',
+      products: cart,
+    };
+
+    const errorValidate = await handleValidate(formData);
+
+    if (errorValidate.error === 1) {
+      addToast({
+        type: 'error',
+        title: 'Erro ao inserir',
+        description: `Erro ao tentar inserir, campo ${errorValidate.message} não preenchido.`,
+      });
+      return;
+    }
+
+    try {
+      const response = await api.post('/orders', formData);
+
+      addToast({
+        type: 'success',
+        title: 'Ordem inserida com sucesso',
+        description: `Order de número ${response.data.id} inserida com sucesso`,
+      });
+
+      handleClearCart();
+    } catch (error) {
+      console.log(error);
+    }
+  }, [
+    cart,
+    paymentStatus,
+    specifClient,
+    totalPrice,
+    specifPayment,
+    handleValidate,
+    addToast,
+    handleClearCart,
+  ]);
 
   return (
     <Container>
@@ -273,6 +375,7 @@ const Seller: React.FC = () => {
               <SelectSearch
                 className="select-products"
                 options={optionsSelect}
+                value={specifClient?.id}
                 onChange={(e) => handleSpecifcClient(e)}
                 placeholder="Selecione o cliente"
                 search
@@ -291,7 +394,7 @@ const Seller: React.FC = () => {
                 </thead>
                 <tbody>
                   {cart.map((product) => (
-                    <tr key={product.id}>
+                    <tr key={product.id_map}>
                       <td>{product.quantity}</td>
                       <td>{product.product_name}</td>
                       <td>{product.formatPrice}</td>
@@ -305,9 +408,28 @@ const Seller: React.FC = () => {
 
             <SelectSearch
               className="select-payment"
+              value={String(specifPayment?.id)}
               options={optionsSelectPayment}
-              onChange={(e) => handleSpecifcClient(e)}
+              onChange={(e) => handleSelectSpecifPayment(e)}
               placeholder="Selecione a forma de pagamento"
+              search
+            />
+
+            <SelectSearch
+              className="select-payment"
+              value={String(paymentStatus?.id)}
+              options={[
+                {
+                  value: '1',
+                  name: 'Pendente',
+                },
+                {
+                  value: '2',
+                  name: 'Pago',
+                },
+              ]}
+              onChange={(e) => handleSelectPaymentStatus(e)}
+              placeholder="Selecione o status do pagamento"
               search
             />
 
