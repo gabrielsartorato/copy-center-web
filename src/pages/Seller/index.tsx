@@ -187,6 +187,36 @@ const Seller: React.FC = () => {
     setPaymentStatus(e);
   }, []);
 
+  const handleValidateProduct = useCallback(
+    (data) => {
+      let error = 0;
+
+      let message = '';
+
+      if (!speficProduct) {
+        message = 'produto';
+        error = 1;
+      }
+
+      if (!data.quantity) {
+        message = 'quantidade';
+        error = 1;
+      }
+
+      console.log(data);
+
+      if (speficProduct?.use_height === 1 || speficProduct?.use_width === 1) {
+        if (!data.height || !data.width) {
+          message = 'comprimento ou largura';
+          error = 1;
+        }
+      }
+
+      return { error, message };
+    },
+    [speficProduct],
+  );
+
   const handleSubmitFormProduct = useCallback(
     async (data) => {
       const formatPrice = data.price.replace(/[^\d]+/g, '');
@@ -194,6 +224,18 @@ const Seller: React.FC = () => {
         data.width && data.height
           ? (data.width * data.height * formatPrice * data.quantity) / 100
           : data.quantity * formatPrice;
+
+      const { error, message } = handleValidateProduct(data);
+
+      if (error === 1) {
+        addToast({
+          type: 'error',
+          title: 'Erro ao inserir produto no carrinho',
+          description: `Campo ${message} deve ser preenchido`,
+        });
+
+        return;
+      }
 
       const formattedProduct = {
         id: speficProduct!.id,
@@ -211,32 +253,9 @@ const Seller: React.FC = () => {
         id_map: v4(),
       };
 
-      if (!data.quantity) {
-        addToast({
-          type: 'error',
-          title: 'Erro ao inserir produto',
-          description:
-            'Ocorreu um erro ao tentar inserir o produto, campo quantidade obritatório',
-        });
-
-        return;
-      }
-
-      if (speficProduct!.use_height === 1 || speficProduct!.use_width === 1) {
-        if (!formattedProduct.height || !formattedProduct.width) {
-          addToast({
-            type: 'error',
-            title: 'Erro ao inserir produto',
-            description:
-              'Ocorreu um erro ao tentar inserir o produto, campo obritatório',
-          });
-          return;
-        }
-      }
-
       setCart([...cart, formattedProduct]);
     },
-    [speficProduct, cart, addToast],
+    [speficProduct, cart, handleValidateProduct, addToast],
   );
 
   const handleClearCart = useCallback(() => {
