@@ -68,6 +68,7 @@ interface IPayment {
 
 interface IPaymentStatus {
   id: number;
+  name: string;
 }
 
 const Seller: React.FC = () => {
@@ -242,7 +243,7 @@ const Seller: React.FC = () => {
     setCart([]);
     setSpecifcClient({} as IClient);
     setSpecifPayment({} as IPayment);
-    setPaymentStatus({} as IPaymentStatus);
+    setPaymentStatus({ id: 0, name: '' } as IPaymentStatus);
   }, []);
 
   const handleValidate = useCallback(async (data) => {
@@ -419,14 +420,8 @@ const Seller: React.FC = () => {
               className="select-payment"
               value={String(paymentStatus?.id)}
               options={[
-                {
-                  value: '1',
-                  name: 'Pendente',
-                },
-                {
-                  value: '2',
-                  name: 'Pago',
-                },
+                { value: '1', name: 'Pago' },
+                { value: '2', name: 'Pendente' },
               ]}
               onChange={(e) => handleSelectPaymentStatus(e)}
               placeholder="Selecione o status do pagamento"
