@@ -45,7 +45,7 @@ const NavigateDrawer: React.FC = () => {
           <FiCreditCard />
           Vendas
         </NavigateLink>
-        <NavigateLink name="/sales-report" path={pathname} to="/">
+        <NavigateLink name="/sales-report" path={pathname} to="/sales-report">
           <FiList />
           Relatório de vendas
         </NavigateLink>
