@@ -67,39 +67,10 @@ export const Order = styled.section`
   div + div {
     display: flex;
     flex-direction: column;
-    /* visibility: hidden;
-    height: 0; */
     margin-top: 8px;
     background: #ffffff;
     color: black;
 
     border-radius: 8px;
-
-    ul {
-      display: flex;
-      padding: 8px;
-
-      justify-content: space-between;
-      width: 100%;
-    }
-
-    ul li {
-      list-style: none;
-    }
-
-    .visibility {
-      visibility: inherit;
-      height: auto;
-    }
   }
-`;
-
-export const Products = styled.div`
-  width: 100%;
-  height: 8px;
-
-  background: #87cefa;
-
-  border-radius: 8px;
-  margin-top: 4px;
 `;

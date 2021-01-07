@@ -1,8 +1,10 @@
+/* eslint-disable no-nested-ternary */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FiArrowDown } from 'react-icons/fi';
 
 import SelectSearch from 'react-select-search';
 import NavigateDrawer from '../../components/NavigateDrawer';
+import formatValue from '../../masks/moneyMask';
 import api from '../../services/api';
 
 import {
@@ -22,11 +24,9 @@ interface IClient {
   email: string;
   status: number;
 }
-
 interface IProduct {
   product_name: string;
 }
-
 interface IListProduct {
   id: string;
   quantity: number;
@@ -35,7 +35,6 @@ interface IListProduct {
   width: number;
   product_id: IProduct;
 }
-
 interface IOrders {
   id: number;
   payment_status: number;
@@ -45,10 +44,6 @@ interface IOrders {
   created_at: Date;
   client: IClient;
   orders_products: IListProduct[];
-}
-
-interface IOpenOrder {
-  id: number;
 }
 
 const ReportSeller: React.FC = () => {
@@ -92,7 +87,19 @@ const ReportSeller: React.FC = () => {
     [openOrders],
   );
 
-  console.log(openOrders);
+  const formatedSales = useMemo(() => {
+    return orders.map((order) => ({
+      ...order,
+      formattedDate: new Date(order.created_at).toLocaleDateString('pt-Br'),
+      formattedValue: formatValue(order.total_price),
+      formattedStatus:
+        order.status === 1
+          ? 'Pago'
+          : order.status === 2
+          ? 'Pendente'
+          : 'Cancelado',
+    }));
+  }, [orders]);
 
   return (
     <Container>
@@ -111,18 +118,25 @@ const ReportSeller: React.FC = () => {
         </HeaderSale>
         <ContainerSales>
           <ContentSales>
-            {orders.map((order) => (
+            {formatedSales.map((order) => (
               <Order key={order.id}>
-                <div>
-                  <span>Pedido: {order.id}</span>
-                  <span>Cliente: {order.client.client_name}</span>
-                  <span>Data: {order.created_at}</span>
-                  <span>R$ {order.total_price}</span>
-                  <FiArrowDown
-                    size={24}
-                    onClick={() => handleOrderVisible(order.id)}
-                  />
-                </div>
+                <table>
+                  <tbody>
+                    <tr>
+                      <td>Pedido: {order.id}</td>
+                      <td>Cliente: {order.client.client_name}</td>
+                      <td>Data: {order.formattedDate}</td>
+                      <td>R$ {order.formattedValue}</td>
+                      <td>Status: {order.formattedStatus}</td>
+                      <td>
+                        <FiArrowDown
+                          size={24}
+                          onClick={() => handleOrderVisible(order.id)}
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
                 <div
                   style={
                     openOrders.includes(order.id)
@@ -130,15 +144,19 @@ const ReportSeller: React.FC = () => {
                       : { visibility: 'hidden', height: 0 }
                   }
                 >
-                  {order.orders_products.map((product) => (
-                    <ul>
-                      <li>Nome: {product.product_id.product_name}</li>
-                      <li>R$ 10,00</li>
-                      <li>Quantidade: {product.quantity}</li>
-                      <li>Altura: {product.height}</li>
-                      <li>Largura: {product.width}</li>
-                    </ul>
-                  ))}
+                  <table>
+                    <tbody>
+                      {order.orders_products.map((product) => (
+                        <tr key={product.id}>
+                          <td>Nome: {product.product_id.product_name}</td>
+                          <td>{formatValue(product.price)}</td>
+                          <td>Quantidade: {product.quantity}</td>
+                          <td>Altura: {product.height || 0} cm</td>
+                          <td>Largura: {product.width || 0} cm</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </Order>
             ))}
