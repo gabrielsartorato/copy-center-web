@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable no-nested-ternary */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FiArrowDown } from 'react-icons/fi';
@@ -50,6 +51,8 @@ const ReportSeller: React.FC = () => {
   const [clients, setClients] = useState<IClient[]>([]);
   const [orders, setOrders] = useState<IOrders[]>([]);
   const [openOrders, setOpenOrders] = useState<number[]>([]);
+  const [specifcClient, setSpecifcClient] = useState<IClient>();
+  const [specifcOrders, setSpecifcOrders] = useState<IOrders[]>([]);
 
   useEffect(() => {
     api.get('clients').then((response) => {
@@ -87,6 +90,19 @@ const ReportSeller: React.FC = () => {
     [openOrders],
   );
 
+  const handleSelecChange = useCallback(
+    (e) => {
+      const findClient = clients.find((client) => client.id === e);
+
+      const specifOrders = orders.filter((order) => order.client.id === e);
+
+      setSpecifcOrders(specifOrders);
+
+      setSpecifcClient(findClient);
+    },
+    [clients, orders],
+  );
+
   const formatedSales = useMemo(() => {
     return orders.map((order) => ({
       ...order,
@@ -101,6 +117,20 @@ const ReportSeller: React.FC = () => {
     }));
   }, [orders]);
 
+  const formatedSpecifOrderClient = useMemo(() => {
+    return specifcOrders.map((order) => ({
+      ...order,
+      formattedDate: new Date(order.created_at).toLocaleDateString('pt-Br'),
+      formattedValue: formatValue(order.total_price),
+      formattedStatus:
+        order.status === 1
+          ? 'Pago'
+          : order.status === 2
+          ? 'Pendente'
+          : 'Cancelado',
+    }));
+  }, [specifcOrders]);
+
   return (
     <Container>
       <NavigateDrawer />
@@ -110,7 +140,7 @@ const ReportSeller: React.FC = () => {
             <SelectSearch
               className="select-payment"
               options={optionsSelect}
-              onChange={(e) => console.log(e)}
+              onChange={(e) => handleSelecChange(e)}
               placeholder="Selecione o cliente"
               search
             />
@@ -118,48 +148,91 @@ const ReportSeller: React.FC = () => {
         </HeaderSale>
         <ContainerSales>
           <ContentSales>
-            {formatedSales.map((order) => (
-              <Order key={order.id}>
-                <table>
-                  <tbody>
-                    <tr>
-                      <td>Pedido: {order.id}</td>
-                      <td>Cliente: {order.client.client_name}</td>
-                      <td>Data: {order.formattedDate}</td>
-                      <td>R$ {order.formattedValue}</td>
-                      <td>Status: {order.formattedStatus}</td>
-                      <td>
-                        <FiArrowDown
-                          size={24}
-                          onClick={() => handleOrderVisible(order.id)}
-                        />
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                <div
-                  style={
-                    openOrders.includes(order.id)
-                      ? { visibility: 'inherit', height: 'auto' }
-                      : { visibility: 'hidden', height: 0 }
-                  }
-                >
+            {specifcClient
+              ? formatedSpecifOrderClient.map((order) => (
+                <Order key={order.id}>
                   <table>
                     <tbody>
-                      {order.orders_products.map((product) => (
-                        <tr key={product.id}>
-                          <td>Nome: {product.product_id.product_name}</td>
-                          <td>{formatValue(product.price)}</td>
-                          <td>Quantidade: {product.quantity}</td>
-                          <td>Altura: {product.height || 0} cm</td>
-                          <td>Largura: {product.width || 0} cm</td>
-                        </tr>
-                      ))}
+                      <tr>
+                        <th>Pedido: {order.id}</th>
+                        <th>Cliente: {order.client.client_name}</th>
+                        <th>Data: {order.formattedDate}</th>
+                        <th>{order.formattedValue}</th>
+                        <th>Status: {order.formattedStatus}</th>
+                        <th>
+                          <FiArrowDown
+                            size={24}
+                            onClick={() => handleOrderVisible(order.id)}
+                          />
+                        </th>
+                      </tr>
                     </tbody>
                   </table>
-                </div>
-              </Order>
-            ))}
+                  <div
+                    style={
+                      openOrders.includes(order.id)
+                        ? { visibility: 'inherit', height: 'auto' }
+                        : { visibility: 'hidden', height: 0 }
+                    }
+                  >
+                    <table>
+                      <tbody>
+                        {order.orders_products.map((product) => (
+                          <tr key={product.id}>
+                            <th>Nome: {product.product_id.product_name}</th>
+                            <th>{formatValue(product.price)}</th>
+                            <th>Quantidade: {product.quantity}</th>
+                            <th>Altura: {product.height || 0} cm</th>
+                            <th>Largura: {product.width || 0} cm</th>
+                          </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </Order>
+                ))
+              : formatedSales.map((order) => (
+                <Order key={order.id}>
+                  <table>
+                    <tbody>
+                      <tr>
+                        <th>Pedido: {order.id}</th>
+                        <th>Cliente: {order.client.client_name}</th>
+                        <th>Data: {order.formattedDate}</th>
+                        <th>{order.formattedValue}</th>
+                        <th>Status: {order.formattedStatus}</th>
+                        <th>
+                          <FiArrowDown
+                            size={24}
+                            onClick={() => handleOrderVisible(order.id)}
+                          />
+                        </th>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div
+                    style={
+                        openOrders.includes(order.id)
+                          ? { visibility: 'inherit', height: 'auto' }
+                          : { visibility: 'hidden', height: 0 }
+                      }
+                  >
+                    <table>
+                      <tbody>
+                        {order.orders_products.map((product) => (
+                          <tr key={product.id}>
+                            <th>Nome: {product.product_id.product_name}</th>
+                            <th>{formatValue(product.price)}</th>
+                            <th>Quantidade: {product.quantity}</th>
+                            <th>Altura: {product.height || 0} cm</th>
+                            <th>Largura: {product.width || 0} cm</th>
+                          </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </Order>
+                ))}
           </ContentSales>
         </ContainerSales>
       </Content>

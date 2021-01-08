@@ -59,18 +59,34 @@ export const Order = styled.section`
 
   border-radius: 8px;
 
-  div {
-    display: flex;
-    justify-content: space-between;
+  table {
+    table-layout: fixed;
+    width: 100%;
   }
 
-  div + div {
-    display: flex;
-    flex-direction: column;
-    margin-top: 8px;
+  table tr th {
+    text-align: left;
+  }
+
+  table tr th:last-child {
+    text-align: right;
+
+    svg {
+      cursor: pointer;
+    }
+  }
+
+  div {
     background: #ffffff;
     color: black;
-
     border-radius: 8px;
+
+    table {
+      padding: 8px;
+    }
+
+    table tr th {
+      text-align: center;
+    }
   }
 `;
