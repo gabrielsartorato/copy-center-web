@@ -4,7 +4,7 @@ import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FiArrowDown } from 'react-icons/fi';
-import { isAfter, isBefore } from 'date-fns'
+import { isAfter, isBefore, isEqual, format, isSameDay, getDay } from 'date-fns'
 
 import SelectSearch from 'react-select-search';
 import Input from '../../components/Input';
@@ -118,18 +118,33 @@ const ReportSeller: React.FC = () => {
   }, [specifcOrders]);
 
   const handleSubimit = useCallback((data) => {
-    console.log(specifcOrders)
-    const initialData = new Date(data.initialData)
-    const finalDate = new Date(data.finalData)
+    const splitedInicialData = data.initialData.split('-')
+    const splitedFinalData = data.initialData.split('-')
+    const initialData = new Date(splitedInicialData[0], splitedInicialData[1] - 1, splitedInicialData[2])
+    const finalDate = new Date(splitedFinalData[0], splitedFinalData[1] - 1, splitedFinalData[2])
 
-    const filteredOrders = specifcOrders.filter((order) => Number(order.status) === Number(selectPaymentType))
+    let filteredOrders = []
+
+    if (specifcClient) {
+      filteredOrders = orders.filter((order) => Number(order.status) === Number(selectPaymentType))
+                            .filter((order) => order.client.id === specifcClient.id)
+                            .filter((order) => isAfter(new Date(order.created_at), initialData))
+                            .filter((order) =>isSameDay(new Date(order.created_at), finalDate)
+                                              || isBefore(new Date(order.created_at), finalDate))
+
+      setSpecifcOrders(filteredOrders);
+      return;
+    }
+
+    filteredOrders = orders.filter((order) => Number(order.status) === Number(selectPaymentType))
                             .filter(order => isAfter(new Date(order.created_at), initialData))
                             .filter(order => isBefore(new Date(order.created_at), finalDate))
 
-    setSpecifcOrders(filteredOrders);
-  }, [specifcOrders, selectPaymentType])
 
-  console.log(specifcOrders)
+    console.log(filteredOrders);
+    setSpecifcOrders(filteredOrders);
+  }, [selectPaymentType, orders, specifcClient])
+
 
   const handleSelecChangeClient = useCallback(
     (e) => {
