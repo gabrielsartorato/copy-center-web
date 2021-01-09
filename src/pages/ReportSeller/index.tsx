@@ -4,7 +4,7 @@ import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FiArrowDown } from 'react-icons/fi';
-import { isAfter, isBefore, isEqual, format, isSameDay, getDay } from 'date-fns'
+import { isAfter, isBefore, isSameDay } from 'date-fns'
 
 import SelectSearch from 'react-select-search';
 import Input from '../../components/Input';
@@ -24,6 +24,7 @@ import {
 } from './styles';
 
 import './stylescss.css'
+import { useToast } from '../../hooks/toast';
 
 interface IClient {
   id: string;
@@ -57,6 +58,7 @@ interface IOrders {
 const ReportSeller: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
 
+  const { addToast } = useToast();
   const [clients, setClients] = useState<IClient[]>([]);
   const [orders, setOrders] = useState<IOrders[]>([]);
   const [openOrders, setOpenOrders] = useState<number[]>([]);
@@ -103,6 +105,20 @@ const ReportSeller: React.FC = () => {
     }));
   }, [orders]);
 
+  const formatedSpecificSales = useMemo(() => {
+    return specifcOrders.map((order) => ({
+      ...order,
+      formattedDate: new Date(order.created_at).toLocaleDateString('pt-Br'),
+      formattedValue: formatValue(order.total_price),
+      formattedStatus:
+        order.status === 1
+          ? 'Pago'
+          : order.status === 2
+          ? 'Pendente'
+          : 'Cancelado',
+    }));
+  }, [specifcOrders]);
+
   const formatedSpecifOrderClient = useMemo(() => {
     return specifcOrders.map((order) => ({
       ...order,
@@ -118,32 +134,61 @@ const ReportSeller: React.FC = () => {
   }, [specifcOrders]);
 
   const handleSubimit = useCallback((data) => {
+    if (data.initialData > data.finalData) {
+      addToast({
+        title: 'Data Incorreta',
+        type: 'error',
+        description: 'Data inicial deve ser menor que data final'
+      })
+    }
+
     const splitedInicialData = data.initialData.split('-')
-    const splitedFinalData = data.initialData.split('-')
+    const splitedFinalData = data.finalData.split('-')
     const initialData = new Date(splitedInicialData[0], splitedInicialData[1] - 1, splitedInicialData[2])
     const finalDate = new Date(splitedFinalData[0], splitedFinalData[1] - 1, splitedFinalData[2])
 
-    let filteredOrders = []
+    if (selectPaymentType && !specifcClient) {
+      const filteredOrders = orders.filter((order) => Number(order.status) === Number(selectPaymentType))
+                              .filter(order => isAfter(new Date(order.created_at), initialData))
+                              .filter((order) =>isSameDay(new Date(order.created_at), finalDate)
+                                              || isBefore(new Date(order.created_at), finalDate));
 
-    if (specifcClient) {
-      filteredOrders = orders.filter((order) => Number(order.status) === Number(selectPaymentType))
-                            .filter((order) => order.client.id === specifcClient.id)
-                            .filter((order) => isAfter(new Date(order.created_at), initialData))
-                            .filter((order) =>isSameDay(new Date(order.created_at), finalDate)
-                                              || isBefore(new Date(order.created_at), finalDate))
-
+      console.log(filteredOrders);
       setSpecifcOrders(filteredOrders);
       return;
     }
 
-    filteredOrders = orders.filter((order) => Number(order.status) === Number(selectPaymentType))
-                            .filter(order => isAfter(new Date(order.created_at), initialData))
-                            .filter(order => isBefore(new Date(order.created_at), finalDate))
+    if (specifcClient) {
+      if (selectPaymentType) {
+        const filteredOrders = orders.filter((order) => Number(order.status) === Number(selectPaymentType))
+                                      .filter((order) => order.client.id === specifcClient.id)
+                                      .filter((order) => isAfter(new Date(order.created_at), initialData))
+                                      .filter((order) =>isSameDay(new Date(order.created_at), finalDate)
+                                                        || isBefore(new Date(order.created_at), finalDate))
 
+        setSpecifcOrders(filteredOrders);
+        return;
+      }
 
-    console.log(filteredOrders);
+      const filteredOrders = orders.filter((order) => order.client.id === specifcClient.id)
+                              .filter((order) => isAfter(new Date(order.created_at), initialData))
+                              .filter((order) =>isSameDay(new Date(order.created_at), finalDate)
+                                              || isBefore(new Date(order.created_at), finalDate))
+
+      console.log('sem tipo de pagamento')
+      setSpecifcOrders(filteredOrders);
+      return;
+    }
+
+    const filteredOrders = orders.filter(order => isAfter(new Date(order.created_at), initialData))
+                            .filter((order) =>isSameDay(new Date(order.created_at), finalDate)
+                            || isBefore(new Date(order.created_at), finalDate))
+
+    console.log('nofilter',filteredOrders)
     setSpecifcOrders(filteredOrders);
-  }, [selectPaymentType, orders, specifcClient])
+
+
+  }, [selectPaymentType, orders, specifcClient, addToast])
 
 
   const handleSelecChangeClient = useCallback(
@@ -178,6 +223,12 @@ const ReportSeller: React.FC = () => {
     [openOrders],
   );
 
+  const handleClearFilter = useCallback(() => {
+    setSpecifcOrders([]);
+    setSpecifcClient({} as IClient);
+    setSelectPaymentType(0);
+  }, [])
+
   return (
     <Container>
       <NavigateDrawer />
@@ -186,6 +237,7 @@ const ReportSeller: React.FC = () => {
           <ContainerSelect>
             <SelectSearch
               className="select-report"
+              value={specifcClient?.id}
               options={optionsSelect}
               onChange={(e) => handleSelecChangeClient(e)}
               placeholder="Selecione o cliente"
@@ -208,6 +260,7 @@ const ReportSeller: React.FC = () => {
               />
 
               <button type="submit">Filtar</button>
+              <button onClick={handleClearFilter} type="button">Limpar</button>
             </Form>
           </section>
         </ContainerFilter>
@@ -256,7 +309,7 @@ const ReportSeller: React.FC = () => {
                   </div>
                 </Order>
                 ))
-              : formatedSales.map((order) => (
+              : formatedSpecificSales ? formatedSpecificSales.map((order) => (
                 <Order key={order.id}>
                   <table>
                     <tbody>
@@ -297,7 +350,50 @@ const ReportSeller: React.FC = () => {
                     </table>
                   </div>
                 </Order>
-                ))}
+                )) :
+                formatedSales.map((order) => (
+                  <Order key={order.id}>
+                    <table>
+                      <tbody>
+                        <tr>
+                          <th>Pedido: {order.id}</th>
+                          <th>Cliente: {order.client.client_name}</th>
+                          <th>Data: {order.formattedDate}</th>
+                          <th>{order.formattedValue}</th>
+                          <th>Status: {order.formattedStatus}</th>
+                          <th>
+                            <FiArrowDown
+                              size={24}
+                              onClick={() => handleOrderVisible(order.id)}
+                            />
+                          </th>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div
+                      style={
+                          openOrders.includes(order.id)
+                            ? { visibility: 'inherit', height: 'auto' }
+                            : { visibility: 'hidden', height: 0 }
+                        }
+                    >
+                      <table>
+                        <tbody>
+                          {order.orders_products.map((product) => (
+                            <tr key={product.id}>
+                              <th>Nome: {product.product_id.product_name}</th>
+                              <th>{formatValue(product.price)}</th>
+                              <th>Quantidade: {product.quantity}</th>
+                              <th>Altura: {product.height || 0} cm</th>
+                              <th>Largura: {product.width || 0} cm</th>
+                            </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </Order>
+                  ))
+                }
           </ContentSales>
         </ContainerSales>
       </Content>

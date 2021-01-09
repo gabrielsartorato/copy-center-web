@@ -65,6 +65,16 @@ export const ContainerFilter = styled.div`
         color: #ffffff;
         width: 30%;
       }
+
+      button[type='button'] {
+        height: 50px;
+        margin-left: 8px;
+        border: none;
+        background: #ff4040;
+        border-radius: 8px;
+        color: #ffffff;
+        width: 30%;
+      }
     }
   }
 `;
