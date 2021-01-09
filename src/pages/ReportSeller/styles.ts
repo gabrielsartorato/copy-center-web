@@ -1,8 +1,4 @@
-import styled, { css } from 'styled-components';
-
-interface IContentSales {
-  open: boolean;
-}
+import styled from 'styled-components';
 
 export const Container = styled.div`
   display: flex;
@@ -28,6 +24,49 @@ export const ContainerSelect = styled.div`
   background: #ffffff;
 
   border-radius: 8px;
+`;
+
+export const ContainerFilter = styled.div`
+  width: 100%;
+  margin-top: 16px;
+
+  section {
+    width: 100%;
+
+    padding: 16px;
+
+    background: #ffffff;
+
+    border-radius: 8px;
+
+    form {
+      display: flex;
+
+      div + div {
+        margin-left: 8px;
+      }
+
+      input[type='date']:before {
+        content: attr(placeholder) !important;
+        color: #aaa;
+        margin-right: 0.5em;
+      }
+      input[type='date']:focus:before,
+      input[type='date']:valid:before {
+        content: '';
+      }
+
+      button[type='submit'] {
+        height: 50px;
+        margin-left: 8px;
+        border: none;
+        background: #1976d2;
+        border-radius: 8px;
+        color: #ffffff;
+        width: 30%;
+      }
+    }
+  }
 `;
 
 export const ContainerSales = styled.div`

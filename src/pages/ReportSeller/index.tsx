@@ -1,9 +1,13 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable no-nested-ternary */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { FormHandles } from '@unform/core';
+import { Form } from '@unform/web';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FiArrowDown } from 'react-icons/fi';
+import { isAfter, isBefore } from 'date-fns'
 
 import SelectSearch from 'react-select-search';
+import Input from '../../components/Input';
 import NavigateDrawer from '../../components/NavigateDrawer';
 import formatValue from '../../masks/moneyMask';
 import api from '../../services/api';
@@ -16,7 +20,10 @@ import {
   ContainerSales,
   ContentSales,
   Order,
+  ContainerFilter
 } from './styles';
+
+import './stylescss.css'
 
 interface IClient {
   id: string;
@@ -48,11 +55,14 @@ interface IOrders {
 }
 
 const ReportSeller: React.FC = () => {
+  const formRef = useRef<FormHandles>(null);
+
   const [clients, setClients] = useState<IClient[]>([]);
   const [orders, setOrders] = useState<IOrders[]>([]);
   const [openOrders, setOpenOrders] = useState<number[]>([]);
   const [specifcClient, setSpecifcClient] = useState<IClient>();
   const [specifcOrders, setSpecifcOrders] = useState<IOrders[]>([]);
+  const [selectPaymentType, setSelectPaymentType] = useState<number>(0);
 
   useEffect(() => {
     api.get('clients').then((response) => {
@@ -73,35 +83,11 @@ const ReportSeller: React.FC = () => {
     }));
   }, [clients]);
 
-  const handleOrderVisible = useCallback(
-    (e) => {
-      const findOrder = openOrders.find((order) => order === e);
-
-      console.log(findOrder);
-
-      if (findOrder) {
-        const filteredOrder = openOrders.filter((order) => order !== findOrder);
-        setOpenOrders(filteredOrder);
-        return;
-      }
-
-      setOpenOrders([...openOrders, e]);
-    },
-    [openOrders],
-  );
-
-  const handleSelecChange = useCallback(
-    (e) => {
-      const findClient = clients.find((client) => client.id === e);
-
-      const specifOrders = orders.filter((order) => order.client.id === e);
-
-      setSpecifcOrders(specifOrders);
-
-      setSpecifcClient(findClient);
-    },
-    [clients, orders],
-  );
+  const optionsSelectPayment = [
+    { value: '1', name: 'Pago'},
+    { value: '2', name: 'Pendente'},
+    { value: '3', name: 'Cancelado'},
+  ]
 
   const formatedSales = useMemo(() => {
     return orders.map((order) => ({
@@ -131,6 +117,52 @@ const ReportSeller: React.FC = () => {
     }));
   }, [specifcOrders]);
 
+  const handleSubimit = useCallback((data) => {
+    console.log(specifcOrders)
+    const initialData = new Date(data.initialData)
+    const finalDate = new Date(data.finalData)
+
+    const filteredOrders = specifcOrders.filter((order) => Number(order.status) === Number(selectPaymentType))
+                            .filter(order => isAfter(new Date(order.created_at), initialData))
+                            .filter(order => isBefore(new Date(order.created_at), finalDate))
+
+    setSpecifcOrders(filteredOrders);
+  }, [specifcOrders, selectPaymentType])
+
+  console.log(specifcOrders)
+
+  const handleSelecChangeClient = useCallback(
+    (e) => {
+      const findClient = clients.find((client) => client.id === e);
+
+      const specifOrders = orders.filter((order) => order.client.id === e);
+
+      setSpecifcOrders(specifOrders);
+
+      setSpecifcClient(findClient);
+    },
+    [clients, orders],
+  );
+
+  const handleSelectPaymentStatys = useCallback((e) => {
+    setSelectPaymentType(e);
+  }, [])
+
+  const handleOrderVisible = useCallback(
+    (e) => {
+      const findOrder = openOrders.find((order) => order === e);
+
+      if (findOrder) {
+        const filteredOrder = openOrders.filter((order) => order !== findOrder);
+        setOpenOrders(filteredOrder);
+        return;
+      }
+
+      setOpenOrders([...openOrders, e]);
+    },
+    [openOrders],
+  );
+
   return (
     <Container>
       <NavigateDrawer />
@@ -138,14 +170,32 @@ const ReportSeller: React.FC = () => {
         <HeaderSale>
           <ContainerSelect>
             <SelectSearch
-              className="select-payment"
+              className="select-report"
               options={optionsSelect}
-              onChange={(e) => handleSelecChange(e)}
+              onChange={(e) => handleSelecChangeClient(e)}
               placeholder="Selecione o cliente"
               search
             />
           </ContainerSelect>
         </HeaderSale>
+        <ContainerFilter>
+          <section>
+            <Form ref={formRef} onSubmit={handleSubimit}>
+              <Input name="initialData" type="date" placeholder="Data Inicial" />
+              <Input name="finalData" type="date" placeholder="Data Final" />
+
+              <SelectSearch
+                className="select-report"
+                options={optionsSelectPayment}
+                onChange={(e) => handleSelectPaymentStatys(e)}
+                placeholder="Selecione o status pagamento"
+                search
+              />
+
+              <button type="submit">Filtar</button>
+            </Form>
+          </section>
+        </ContainerFilter>
         <ContainerSales>
           <ContentSales>
             {specifcClient
