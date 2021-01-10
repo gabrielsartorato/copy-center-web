@@ -237,20 +237,29 @@ const ReportSeller: React.FC = () => {
 
     await api.patch(`orders/${id}`, data);
 
+    const findIndexOrder = orders.findIndex((order) => order.id === id);
     const findOrder = orders.find((order) => order.id === id);
 
-    if (!findOrder) {
+    const findIndexOrderSpecifc = specifcOrders.findIndex((order) => order.id === id);
+    const findOrderSpecific = specifcOrders.find((order) => order.id === id);
+
+    if (!findOrder || !findOrderSpecific) {
       alert('Order não encontrada');
       return;
     }
 
-    Object.assign(findOrder, { status: 1 })
+    orders[findIndexOrder] = {
+      ...findOrder,
+      status: 2
+    }
 
-    const filteredOrders = orders.filter((order) => order.id !== id);
-    const filteredSpecifOrders = specifcOrders.filter((order) => order.id !== id);
+    specifcOrders[findIndexOrderSpecifc] = {
+      ...findOrderSpecific,
+      status: 1
+    }
 
-    setOrders([...filteredOrders, findOrder]);
-    setSpecifcOrders([...filteredSpecifOrders, findOrder]);
+    setOrders([...orders]);
+    setSpecifcOrders([...specifcOrders]);
 
   }, [orders, specifcOrders]);
 
@@ -404,12 +413,7 @@ const ReportSeller: React.FC = () => {
                         <th>Data: {order.formattedDate}</th>
                         <th>{order.formattedValue}</th>
                         <th>Status: {order.formattedStatus}</th>
-                        <th>
-                          <FiArrowDown
-                            size={24}
-                            onClick={() => handleOrderVisible(order.id)}
-                          />
-                        </th>
+
                         <th>
                           <i>
                             <button
@@ -426,6 +430,7 @@ const ReportSeller: React.FC = () => {
                               Pagar
                             </button>
                           </i>
+
                         </th>
                         <th>
                           <i>
@@ -443,6 +448,12 @@ const ReportSeller: React.FC = () => {
                               Cancelar
                             </button>
                           </i>
+                        </th>
+                        <th>
+                          <FiArrowDown
+                            size={24}
+                            onClick={() => handleOrderVisible(order.id)}
+                          />
                         </th>
                       </tr>
                     </tbody>
@@ -481,12 +492,6 @@ const ReportSeller: React.FC = () => {
                           <th>{order.formattedValue}</th>
                           <th>Status: {order.formattedStatus}</th>
                           <th>
-                            <FiArrowDown
-                              size={24}
-                              onClick={() => handleOrderVisible(order.id)}
-                            />
-                          </th>
-                          <th>
                             <i>
                               <button
                                 onClick={() => handlePayOrder(order.id)}
@@ -519,6 +524,12 @@ const ReportSeller: React.FC = () => {
                                 Cancelar
                               </button>
                             </i>
+                          </th>
+                          <th>
+                            <FiArrowDown
+                              size={24}
+                              onClick={() => handleOrderVisible(order.id)}
+                            />
                           </th>
                         </tr>
                       </tbody>
