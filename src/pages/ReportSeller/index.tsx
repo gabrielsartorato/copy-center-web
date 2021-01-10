@@ -234,7 +234,8 @@ const ReportSeller: React.FC = () => {
     const data = {
       status: 1
     }
-   await api.patch(`orders/${id}`, data);
+
+    await api.patch(`orders/${id}`, data);
 
     const findOrder = orders.find((order) => order.id === id);
 
@@ -253,10 +254,31 @@ const ReportSeller: React.FC = () => {
 
   }, [orders, specifcOrders]);
 
-  const handleCancelOrder = useCallback((data) => {
-    const result = window.confirm(`Deseja realment cancelar a ordem: ${data}`);
-    console.log(result);
-  }, []);
+  const handleCancelOrder = useCallback(async (id) => {
+    const result = window.confirm(`Deseja realment cancelar a ordem: ${id}`);
+
+    if (!result) {
+      return;
+    }
+
+    await api.patch(`orders/cancel/${id}`);
+
+    const findOrder = orders.find((order) => order.id === id);
+
+    if (!findOrder) {
+      alert('Order não encontrada');
+      return;
+    }
+
+    Object.assign(findOrder, { status: 3 })
+
+    const filteredOrders = orders.filter((order) => order.id !== id);
+    const filteredSpecifOrders = specifcOrders.filter((order) => order.id !== id);
+
+    setOrders([...filteredOrders, findOrder]);
+    setSpecifcOrders([...filteredSpecifOrders, findOrder]);
+
+  }, [orders, specifcOrders]);
 
   return (
     <Container>
