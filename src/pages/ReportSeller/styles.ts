@@ -115,6 +115,43 @@ export const Order = styled.section`
 
   table tr th {
     text-align: left;
+
+    i {
+      button[name='pay-button'] {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        height: 40px;
+        width: 120px;
+
+        border: none;
+        border-radius: 8px;
+        color: #ffffff;
+
+        svg {
+          margin-right: 8px;
+        }
+      }
+
+      button[name='cancel-button'] {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        height: 40px;
+        width: 120px;
+
+        border: none;
+        background: #ff4040;
+        border-radius: 8px;
+        color: #ffffff;
+
+        svg {
+          margin-right: 8px;
+        }
+      }
+    }
   }
 
   table tr th:last-child {

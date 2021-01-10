@@ -3,7 +3,7 @@
 import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FiArrowDown } from 'react-icons/fi';
+import { FiArrowDown, FiCheck, FiTrash2 } from 'react-icons/fi';
 import { isAfter, isBefore, isSameDay } from 'date-fns'
 
 import SelectSearch from 'react-select-search';
@@ -89,7 +89,7 @@ const ReportSeller: React.FC = () => {
     { value: '1', name: 'Pago'},
     { value: '2', name: 'Pendente'},
     { value: '3', name: 'Cancelado'},
-  ]
+  ];
 
   const formatedSales = useMemo(() => {
     return orders.map((order) => ({
@@ -188,7 +188,7 @@ const ReportSeller: React.FC = () => {
     setSpecifcOrders(filteredOrders);
 
 
-  }, [selectPaymentType, orders, specifcClient, addToast])
+  }, [selectPaymentType, orders, specifcClient, addToast]);
 
 
   const handleSelecChangeClient = useCallback(
@@ -206,7 +206,7 @@ const ReportSeller: React.FC = () => {
 
   const handleSelectPaymentStatys = useCallback((e) => {
     setSelectPaymentType(e);
-  }, [])
+  }, []);
 
   const handleOrderVisible = useCallback(
     (e) => {
@@ -227,7 +227,36 @@ const ReportSeller: React.FC = () => {
     setSpecifcOrders([]);
     setSpecifcClient({} as IClient);
     setSelectPaymentType(0);
-  }, [])
+  }, []);
+
+  const handlePayOrder = useCallback(async (id) => {
+
+    const data = {
+      status: 1
+    }
+   await api.patch(`orders/${id}`, data);
+
+    const findOrder = orders.find((order) => order.id === id);
+
+    if (!findOrder) {
+      alert('Order não encontrada');
+      return;
+    }
+
+    Object.assign(findOrder, { status: 1 })
+
+    const filteredOrders = orders.filter((order) => order.id !== id);
+    const filteredSpecifOrders = specifcOrders.filter((order) => order.id !== id);
+
+    setOrders([...filteredOrders, findOrder]);
+    setSpecifcOrders([...filteredSpecifOrders, findOrder]);
+
+  }, [orders, specifcOrders]);
+
+  const handleCancelOrder = useCallback((data) => {
+    const result = window.confirm(`Deseja realment cancelar a ordem: ${data}`);
+    console.log(result);
+  }, []);
 
   return (
     <Container>
@@ -278,6 +307,40 @@ const ReportSeller: React.FC = () => {
                         <th>{order.formattedValue}</th>
                         <th>Status: {order.formattedStatus}</th>
                         <th>
+                          <i>
+                            <button
+                              onClick={() => handlePayOrder(order.id)}
+                              disabled={order.status === 1}
+                              style={order.status === 1 || order.status === 3 ?
+                                { cursor: 'default', background: '#d3d3d3' }
+                                : {  background: '#1976d2', cursor: 'pointer' }
+                              }
+                              name="pay-button"
+                              type="button"
+                            >
+                              <FiCheck size={24} />
+                              Pagar
+                            </button>
+                          </i>
+                        </th>
+                        <th>
+                          <i>
+                            <button
+                              name="cancel-button"
+                              type="button"
+                              disabled={order.status === 3}
+                              style={order.status === 3 ?
+                                { cursor: 'default', background: '#d3d3d3' }
+                                : {  background: '#ff4040', cursor: 'pointer' }
+                              }
+                              onClick={() => handleCancelOrder(order.id)}
+                            >
+                              <FiTrash2 size={24} />
+                              Cancelar
+                            </button>
+                          </i>
+                        </th>
+                        <th>
                           <FiArrowDown
                             size={24}
                             onClick={() => handleOrderVisible(order.id)}
@@ -325,6 +388,40 @@ const ReportSeller: React.FC = () => {
                             onClick={() => handleOrderVisible(order.id)}
                           />
                         </th>
+                        <th>
+                          <i>
+                            <button
+                              onClick={() => handlePayOrder(order.id)}
+                              disabled={order.status === 1}
+                              style={order.status === 1 || order.status === 3 ?
+                                { cursor: 'default', background: '#d3d3d3' }
+                                : {  background: '#1976d2', cursor: 'pointer' }
+                              }
+                              name="pay-button"
+                              type="button"
+                            >
+                              <FiCheck size={24} />
+                              Pagar
+                            </button>
+                          </i>
+                        </th>
+                        <th>
+                          <i>
+                            <button
+                              name="cancel-button"
+                              type="button"
+                              disabled={order.status === 3}
+                              style={order.status === 3 ?
+                                { cursor: 'default', background: '#d3d3d3' }
+                                : {  background: '#ff4040', cursor: 'pointer' }
+                              }
+                              onClick={() => handleCancelOrder(order.id)}
+                            >
+                              <FiTrash2 size={24} />
+                              Cancelar
+                            </button>
+                          </i>
+                        </th>
                       </tr>
                     </tbody>
                   </table>
@@ -366,6 +463,40 @@ const ReportSeller: React.FC = () => {
                               size={24}
                               onClick={() => handleOrderVisible(order.id)}
                             />
+                          </th>
+                          <th>
+                            <i>
+                              <button
+                                onClick={() => handlePayOrder(order.id)}
+                                disabled={order.status === 1}
+                                style={order.status === 1 || order.status === 3 ?
+                                { cursor: 'default', background: '#d3d3d3' }
+                                : {  background: '#1976d2', cursor: 'pointer' }
+                              }
+                                name="pay-button"
+                                type="button"
+                              >
+                                <FiCheck size={24} />
+                                Pagar
+                              </button>
+                            </i>
+                          </th>
+                          <th>
+                            <i>
+                              <button
+                                name="cancel-button"
+                                type="button"
+                                disabled={order.status === 3}
+                                style={order.status === 3 ?
+                                { cursor: 'default', background: '#d3d3d3' }
+                                : {  background: '#ff4040', cursor: 'pointer' }
+                              }
+                                onClick={() => handleCancelOrder(order.id)}
+                              >
+                                <FiTrash2 size={24} />
+                                Cancelar
+                              </button>
+                            </i>
                           </th>
                         </tr>
                       </tbody>
