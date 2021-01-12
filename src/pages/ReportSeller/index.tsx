@@ -9,7 +9,6 @@ import React, {
 } from 'react';
 import { FiArrowDown, FiCheck, FiTrash2 } from 'react-icons/fi';
 import { isAfter, isBefore, isSameDay } from 'date-fns';
-import { round } from 'lodash';
 
 import SelectSearch from 'react-select-search';
 import Input from '../../components/Input';
