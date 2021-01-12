@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import { FiArrowDown, FiCheck, FiTrash2 } from 'react-icons/fi';
 import { isAfter, isBefore, isSameDay } from 'date-fns';
+import { round } from 'lodash';
 
 import SelectSearch from 'react-select-search';
 import Input from '../../components/Input';
@@ -174,6 +175,26 @@ const ReportSeller: React.FC = () => {
           : 'Cancelado',
     }));
   }, [orders, selectPaymentType, specifcClient, initialDate, finalDate]);
+
+  const priceValues = useMemo(() => {
+    const positivePrice = formatedSales.reduce((acc, order) => {
+      const price = Number(order.total_price.replace('.', ''));
+      return order.status === 1 ? acc + price / 100 : acc + 0;
+    }, 0);
+
+    const negativePrice = formatedSales.reduce((acc, order) => {
+      const price = Number(order.total_price.replace('.', ''));
+      return order.status === 2 ? acc + price / 100 : acc + 0;
+    }, 0);
+
+    return {
+      positivePrice,
+      negativePrice,
+    };
+  }, [formatedSales]);
+
+  console.log(formatValue(String(priceValues.positivePrice * 100)));
+  console.log(formatValue(String(priceValues.negativePrice * 100)));
 
   const handleSubimit = useCallback(
     (data) => {

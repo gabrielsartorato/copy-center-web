@@ -17,6 +17,7 @@
     "axios": "^0.21.0",
     "date-fns": "^2.16.1",
     "intl": "^1.2.5",
+    "lodash": "^4.17.20",
     "polished": "^4.0.3",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -51,6 +52,7 @@
     ]
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.167",
     "@types/react-router-dom": "^5.1.6",
     "@types/react-select": "^3.0.26",
     "@types/styled-components": "^5.1.4",
