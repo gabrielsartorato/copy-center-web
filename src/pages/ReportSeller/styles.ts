@@ -32,6 +32,32 @@ export const ContainerSelect = styled.div`
   }
 `;
 
+export const ContainerPayments = styled.div`
+  display: flex;
+  width: 100%;
+
+  margin-top: 16px;
+
+  section {
+    width: 100%;
+    height: 48px;
+
+    background: #ffffff;
+    border-radius: 8px;
+
+    padding: 8px;
+
+    span {
+      font-size: 24px;
+      color: #1c1c1c;
+    }
+
+    span + span {
+      margin-left: 48px;
+    }
+  }
+`;
+
 export const ContainerFilter = styled.div`
   width: 100%;
   margin-top: 16px;

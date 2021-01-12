@@ -20,6 +20,7 @@ import {
   Container,
   Content,
   HeaderSale,
+  ContainerPayments,
   ContainerSelect,
   ContainerSales,
   ContentSales,
@@ -105,6 +106,8 @@ const ReportSeller: React.FC = () => {
         (order) => order.client.id === specifcClient.id,
       );
 
+      console.log('1', filteredOrders);
+
       if (initialDate && finalDate) {
         filteredOrders = filteredOrders
           .filter((order) => isAfter(new Date(order.created_at), initialDate))
@@ -115,7 +118,7 @@ const ReportSeller: React.FC = () => {
           );
       }
 
-      if (selectPaymentType) {
+      if (selectPaymentType !== 0) {
         filteredOrders = filteredOrders.filter(
           (order) => Number(order.status) === Number(selectPaymentType),
         );
@@ -192,9 +195,6 @@ const ReportSeller: React.FC = () => {
     };
   }, [formatedSales]);
 
-  console.log(formatValue(String(priceValues.positivePrice * 100)));
-  console.log(formatValue(String(priceValues.negativePrice * 100)));
-
   const handleSubimit = useCallback(
     (data) => {
       if (data.initialData > data.finalData) {
@@ -260,6 +260,8 @@ const ReportSeller: React.FC = () => {
     setSpecifcOrders([]);
     setSpecifcClient({} as IClient);
     setSelectPaymentType(0);
+    formRef.current?.clearField('initialData');
+    formRef.current?.clearField('finalData');
   }, []);
 
   const handlePayOrder = useCallback(
@@ -346,6 +348,7 @@ const ReportSeller: React.FC = () => {
             <SelectSearch
               className="select-report"
               options={optionsSelectPayment}
+              value={String(selectPaymentType)}
               onChange={(e) => handleSelectPaymentStatys(e)}
               placeholder="Selecione o status pagamento"
               search
@@ -369,6 +372,16 @@ const ReportSeller: React.FC = () => {
             </Form>
           </section>
         </ContainerFilter>
+        <ContainerPayments>
+          <section>
+            <span>
+              Pagos: {formatValue(String(priceValues.positivePrice * 100))}
+            </span>
+            <span>
+              Pendentes: {formatValue(String(priceValues.negativePrice * 100))}
+            </span>
+          </section>
+        </ContainerPayments>
         <ContainerSales>
           <ContentSales>
             {formatedSales.map((order) => (
