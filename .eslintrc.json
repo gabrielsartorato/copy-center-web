@@ -25,6 +25,7 @@
         "prettier"
     ],
     "rules": {
+      "no-nested-ternary":"off",
       "no-alert":"off",
       "react-hooks/rules-of-hooks": "error",
       "react/jsx-one-expression-per-line": "off",

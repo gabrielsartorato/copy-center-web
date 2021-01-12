@@ -19,11 +19,17 @@ export const HeaderSale = styled.div`
 `;
 
 export const ContainerSelect = styled.div`
+  display: flex;
   padding: 16px;
 
   background: #ffffff;
 
   border-radius: 8px;
+
+  div + div {
+    margin-left: 16px;
+    width: 40%;
+  }
 `;
 
 export const ContainerFilter = styled.div`
