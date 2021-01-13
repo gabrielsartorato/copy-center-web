@@ -112,6 +112,18 @@ export const ContainerSeller = styled.div`
     border-radius: 16px;
     background: #f9f7db;
   }
+
+  textarea {
+    margin-top: 8px;
+    width: 100%;
+    border-radius: 8px;
+    padding: 8px;
+
+    resize: none;
+
+    height: 80px;
+  }
+
   header {
     font-size: 24px;
     margin-bottom: 8px;

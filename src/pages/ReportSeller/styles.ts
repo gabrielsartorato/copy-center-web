@@ -195,6 +195,7 @@ export const Order = styled.section`
   }
 
   div {
+    margin-top: 8px;
     background: #ffffff;
     color: black;
     border-radius: 8px;

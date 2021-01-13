@@ -83,6 +83,7 @@ const Seller: React.FC = () => {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [speficProduct, setSpeficProduct] = useState<IProduct>();
   const [cart, setCart] = useState<IProduct[]>([]);
+  const [description, setDescription] = useState('');
   const formRef = useRef<FormHandles>(null);
 
   useEffect(() => {
@@ -161,7 +162,7 @@ const Seller: React.FC = () => {
 
   const totalPrice = useMemo(() => {
     const total = cart.reduce((acc, product) => {
-      return acc + product.price;
+      return acc + product.price * 100;
     }, 0);
 
     return formatValue(String(total));
@@ -222,10 +223,12 @@ const Seller: React.FC = () => {
       const formatPrice = data.price.replace(/[^\d]+/g, '');
       const price =
         data.width && data.height
-          ? (data.width * data.height * formatPrice * data.quantity) / 100
+          ? (data.width * data.height * formatPrice * data.quantity) / 1000
           : data.quantity * formatPrice;
 
       const { error, message } = handleValidateProduct(data);
+
+      console.log(price);
 
       if (error === 1) {
         addToast({
@@ -245,7 +248,7 @@ const Seller: React.FC = () => {
         use_width: speficProduct!.use_width,
         created_at: speficProduct!.created_at,
         updated_at: speficProduct!.updated_at,
-        price,
+        price: price / 100,
         formatPrice: formatValue(String(price)),
         quantity: data.quantity,
         height: data.height || 0,
@@ -257,6 +260,8 @@ const Seller: React.FC = () => {
     },
     [speficProduct, cart, handleValidateProduct, addToast],
   );
+
+  console.log(cart);
 
   const handleClearCart = useCallback(() => {
     setCart([]);
@@ -305,7 +310,7 @@ const Seller: React.FC = () => {
       payment_id: specifPayment?.id,
       payment_status: Number(paymentStatus),
       total_price: Number(totalPrice.replace(/[^\d]+/g, '')) / 100,
-      description: 'teste',
+      description: description || '',
       products: cart,
     };
 
@@ -342,6 +347,7 @@ const Seller: React.FC = () => {
     handleValidate,
     addToast,
     handleClearCart,
+    description,
   ]);
 
   return (
@@ -425,6 +431,16 @@ const Seller: React.FC = () => {
               <p>-----------------------------------------------------------</p>
               <p>{totalPrice}</p>
             </section>
+
+            <div>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Descrição"
+                name=""
+                id=""
+              />
+            </div>
 
             <SelectSearch
               className="select-payment"

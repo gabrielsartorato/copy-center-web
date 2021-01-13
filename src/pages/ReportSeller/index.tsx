@@ -443,7 +443,7 @@ const ReportSeller: React.FC = () => {
                   style={
                     openOrders.includes(order.id)
                       ? { visibility: 'inherit', height: 'auto' }
-                      : { visibility: 'hidden', height: 0 }
+                      : { visibility: 'hidden', height: 0, display: 'none' }
                   }
                 >
                   <table>
@@ -451,7 +451,7 @@ const ReportSeller: React.FC = () => {
                       {order.orders_products.map((product) => (
                         <tr key={product.id}>
                           <th>Nome: {product.product_id.product_name}</th>
-                          <th>{formatValue(product.price)}</th>
+                          <th>{formatValue(String(product.price))}</th>
                           <th>Quantidade: {product.quantity}</th>
                           <th>Altura: {product.height || 0} cm</th>
                           <th>Largura: {product.width || 0} cm</th>
@@ -460,6 +460,9 @@ const ReportSeller: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
+                <p style={{ fontSize: '24px', marginTop: '8px' }}>
+                  Descrição: {order.description}
+                </p>
               </Order>
             ))}
           </ContentSales>
@@ -470,3 +473,5 @@ const ReportSeller: React.FC = () => {
 };
 
 export default ReportSeller;
+
+// formatValue(String(product.price))
