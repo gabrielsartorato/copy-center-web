@@ -167,7 +167,9 @@ const ReportSeller: React.FC = () => {
 
     return orders.map((order) => ({
       ...order,
-      formattedDate: new Date(order.created_at).toLocaleDateString('pt-Br'),
+      formattedDate: Intl.DateTimeFormat('pt-br').format(
+        new Date(order.created_at),
+      ),
       formattedValue: formatValue(order.total_price),
       formattedStatus:
         order.status === 1
