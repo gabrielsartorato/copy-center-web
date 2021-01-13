@@ -106,8 +106,6 @@ const ReportSeller: React.FC = () => {
         (order) => order.client.id === specifcClient.id,
       );
 
-      console.log('1', filteredOrders);
-
       if (initialDate && finalDate) {
         filteredOrders = filteredOrders
           .filter((order) => isAfter(new Date(order.created_at), initialDate))
@@ -126,7 +124,9 @@ const ReportSeller: React.FC = () => {
 
       return filteredOrders.map((order) => ({
         ...order,
-        formattedDate: new Date(order.created_at).toLocaleDateString('pt-Br'),
+        formattedDate: Intl.DateTimeFormat('pt-br').format(
+          new Date(order.created_at),
+        ),
         formattedValue: formatValue(order.total_price),
         formattedStatus:
           order.status === 1
@@ -154,7 +154,9 @@ const ReportSeller: React.FC = () => {
 
       return filteredOrders.map((order) => ({
         ...order,
-        formattedDate: new Date(order.created_at).toLocaleDateString('pt-Br'),
+        formattedDate: Intl.DateTimeFormat('pt-br').format(
+          new Date(order.created_at),
+        ),
         formattedValue: formatValue(order.total_price),
         formattedStatus:
           order.status === 1
@@ -264,6 +266,8 @@ const ReportSeller: React.FC = () => {
     setSelectPaymentType(0);
     formRef.current?.clearField('initialData');
     formRef.current?.clearField('finalData');
+    setInitialData(0);
+    setFinalData(0);
   }, []);
 
   const handlePayOrder = useCallback(
