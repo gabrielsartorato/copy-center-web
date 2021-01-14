@@ -71,6 +71,16 @@ interface IPaymentStatus {
   name: string;
 }
 
+interface IProductCart {
+  product_id: string;
+  quantity: number;
+  price: number;
+  height: number;
+  width: number;
+  name: string;
+  id_map: string;
+}
+
 const Seller: React.FC = () => {
   const { signOut } = useAuth();
   const { addToast } = useToast();
@@ -82,7 +92,7 @@ const Seller: React.FC = () => {
   const [paymentStatus, setPaymentStatus] = useState<IPaymentStatus>();
   const [products, setProducts] = useState<IProduct[]>([]);
   const [speficProduct, setSpeficProduct] = useState<IProduct>();
-  const [cart, setCart] = useState<IProduct[]>([]);
+  const [cart, setCart] = useState<IProductCart[]>([]);
   const [description, setDescription] = useState('');
   const formRef = useRef<FormHandles>(null);
 
@@ -162,10 +172,13 @@ const Seller: React.FC = () => {
 
   const totalPrice = useMemo(() => {
     const total = cart.reduce((acc, product) => {
-      return acc + product.price * 100;
+      return acc + product.price;
     }, 0);
 
-    return formatValue(String(total));
+    return Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(total);
   }, [cart]);
 
   const handleSpecifcClient = useCallback(
@@ -220,15 +233,18 @@ const Seller: React.FC = () => {
 
   const handleSubmitFormProduct = useCallback(
     async (data) => {
-      const formatPrice = data.price.replace(/[^\d]+/g, '');
+      const formatPrice = data.price
+        .replace(/[R][^\w.@-]/, '')
+        .replace(',', '.');
+      const formatHeight = data.height ? data.height.replace(',', '.') : 0;
+      const formatWidth = data.width ? data.width.replace(',', '.') : 0;
+
       const price =
         data.width && data.height
-          ? (data.width * data.height * formatPrice * data.quantity) / 1000
+          ? formatHeight * formatWidth * data.quantity * formatPrice
           : data.quantity * formatPrice;
 
       const { error, message } = handleValidateProduct(data);
-
-      console.log(price);
 
       if (error === 1) {
         addToast({
@@ -239,20 +255,15 @@ const Seller: React.FC = () => {
 
         return;
       }
+      console.log(price);
 
-      const formattedProduct = {
-        id: speficProduct!.id,
+      const formattedProduct: IProductCart = {
         product_id: speficProduct!.id,
-        product_name: speficProduct!.product_name,
-        use_height: speficProduct!.use_height,
-        use_width: speficProduct!.use_width,
-        created_at: speficProduct!.created_at,
-        updated_at: speficProduct!.updated_at,
-        price: price / 100,
-        formatPrice: formatValue(String(price)),
+        price: Number(price),
         quantity: data.quantity,
-        height: data.height || 0,
-        width: data.width || 0,
+        height: formatHeight,
+        width: formatWidth,
+        name: speficProduct!.product_name,
         id_map: v4(),
       };
 
@@ -260,8 +271,6 @@ const Seller: React.FC = () => {
     },
     [speficProduct, cart, handleValidateProduct, addToast],
   );
-
-  console.log(cart);
 
   const handleClearCart = useCallback(() => {
     setCart([]);
@@ -378,12 +387,18 @@ const Seller: React.FC = () => {
                     placeholder="Quantidade"
                   />
                   {speficProduct?.use_height ? (
-                    <Input name="width" placeholder="Comprimento em cm" />
+                    <Input
+                      name="width"
+                      placeholder="Comprimento em metros ex: 1,20"
+                    />
                   ) : (
                     <span />
                   )}
                   {speficProduct?.use_width ? (
-                    <Input name="height" placeholder="Largura em cm" />
+                    <Input
+                      name="height"
+                      placeholder="Largura em metros ex: 1,20"
+                    />
                   ) : (
                     <span />
                   )}
@@ -422,8 +437,13 @@ const Seller: React.FC = () => {
                   {cart.map((product) => (
                     <tr key={product.id_map}>
                       <td>{product.quantity}</td>
-                      <td>{product.product_name}</td>
-                      <td>{product.formatPrice}</td>
+                      <td>{product.name}</td>
+                      <td>
+                        {Intl.NumberFormat('pt-Br', {
+                          style: 'currency',
+                          currency: 'BRL',
+                        }).format(product.price)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

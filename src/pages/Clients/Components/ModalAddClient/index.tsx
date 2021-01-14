@@ -49,10 +49,8 @@ const ModalAddClient: React.FC<IModalProps> = ({
       try {
         const schema = Yup.object().shape({
           name: Yup.string().required('Campo obrigatório'),
-          email: Yup.string()
-            .email('Email Inválido')
-            .required('Campo Obrigatório'),
-          cpf_cnpj: Yup.string().required('Campo obirgatório'),
+          email: Yup.string().email('Email Inválido'),
+          cpf_cnpj: Yup.string(),
           phone_number: Yup.string(),
         });
 
@@ -62,8 +60,8 @@ const ModalAddClient: React.FC<IModalProps> = ({
 
         const response = await api.post('clients', {
           client_name: data.name,
-          cpf_cnpj: data.cpf_cnpj.replace(/[^\d]+/g, ''),
-          phone_number: data.phone.replace(/[^\d]+/g, ''),
+          cpf_cnpj: data.cpf_cnpj.replace(/[^\d]+/g, '') || '',
+          phone_number: data.phone.replace(/[^\d]+/g, '' || ''),
           email: data.email,
         });
 

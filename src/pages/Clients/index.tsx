@@ -166,6 +166,8 @@ const Clients: React.FC = () => {
     }));
   }, [clients]);
 
+  console.log(clients);
+
   return (
     <Container>
       <NavigateDrawer />
