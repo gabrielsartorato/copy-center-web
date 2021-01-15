@@ -1,16 +1,17 @@
-import React from 'react';
-import { FiCreditCard, FiUsers } from 'react-icons/fi';
+import React, { useState } from 'react';
+import { FiUsers } from 'react-icons/fi';
 import NavigateDrawer from '../../components/NavigateDrawer';
+import api from '../../services/api';
 
-import {
-  Container,
-  Content,
-  CardContent,
-  ContentInformation,
-  ContentTable,
-} from './styles';
+import { Container, Content, CardContent, ContentInformation } from './styles';
 
 const DashBoard: React.FC = () => {
+  const [activeClient, setActiveClient] = useState<number>(0);
+
+  api.get('clients/count').then((response) => {
+    setActiveClient(response.data);
+  });
+
   return (
     <Container>
       <NavigateDrawer />
@@ -18,16 +19,10 @@ const DashBoard: React.FC = () => {
         <ContentInformation>
           <CardContent>
             <FiUsers />
-            <h3>Clientes</h3>
-            <p>25</p>
-          </CardContent>
-          <CardContent>
-            <FiCreditCard />
-            <h3>Vendas do Dia</h3>
-            <p>128</p>
+            <h3>Clientes Ativos</h3>
+            <p>{activeClient}</p>
           </CardContent>
         </ContentInformation>
-        <ContentTable />
       </Content>
     </Container>
   );

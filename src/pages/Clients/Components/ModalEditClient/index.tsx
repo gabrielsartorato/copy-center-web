@@ -54,8 +54,8 @@ const ModalEditClient: React.FC<IModalProps> = ({
       try {
         const schema = Yup.object().shape({
           client_name: Yup.string().required('Campo Obrigatório!'),
-          email: Yup.string().email('Email invalido!'),
-          formatCpf: Yup.string().required('Campo obritagório'),
+          email: Yup.string(),
+          formatCpf: Yup.string(),
         });
 
         await schema.validate(data, {

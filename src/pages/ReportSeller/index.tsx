@@ -101,6 +101,7 @@ const ReportSeller: React.FC = () => {
 
   const formatedSales = useMemo(() => {
     let filteredOrders: IOrders[] = [];
+
     if (specifcClient) {
       filteredOrders = orders.filter(
         (order) => order.client.id === specifcClient.id,
@@ -120,6 +121,57 @@ const ReportSeller: React.FC = () => {
         filteredOrders = filteredOrders.filter(
           (order) => Number(order.status) === Number(selectPaymentType),
         );
+      }
+
+      return filteredOrders.map((order) => ({
+        ...order,
+        formattedDate: Intl.DateTimeFormat('pt-br').format(
+          new Date(order.created_at),
+        ),
+        formattedValue: formatValue(order.total_price),
+        formattedStatus:
+          order.status === 1
+            ? 'Pago'
+            : order.status === 2
+            ? 'Pendente'
+            : 'Cancelado',
+      }));
+    }
+
+    if (selectPaymentType !== 0) {
+      console.log('only payment');
+      filteredOrders = orders.filter(
+        (order) => Number(order.status) === Number(selectPaymentType),
+      );
+
+      if (initialDate && finalDate) {
+        filteredOrders = orders
+          .filter((order) => isAfter(new Date(order.created_at), initialDate))
+          .filter(
+            (order) =>
+              isSameDay(new Date(order.created_at), finalDate) ||
+              isBefore(new Date(order.created_at), finalDate),
+          );
+
+        if (selectPaymentType) {
+          filteredOrders = filteredOrders.filter(
+            (order) => Number(order.status) === Number(selectPaymentType),
+          );
+        }
+
+        return filteredOrders.map((order) => ({
+          ...order,
+          formattedDate: Intl.DateTimeFormat('pt-br').format(
+            new Date(order.created_at),
+          ),
+          formattedValue: formatValue(order.total_price),
+          formattedStatus:
+            order.status === 1
+              ? 'Pago'
+              : order.status === 2
+              ? 'Pendente'
+              : 'Cancelado',
+        }));
       }
 
       return filteredOrders.map((order) => ({
@@ -201,12 +253,24 @@ const ReportSeller: React.FC = () => {
 
   const handleSubimit = useCallback(
     (data) => {
+      if (data.initialData === '' || data.finalData === '') {
+        addToast({
+          title: 'Data Incorreta',
+          type: 'error',
+          description: 'Campos Data inicial e final não podem ser vazios',
+        });
+
+        return;
+      }
+
       if (data.initialData > data.finalData) {
         addToast({
           title: 'Data Incorreta',
           type: 'error',
           description: 'Data inicial deve ser menor que data final',
         });
+
+        return;
       }
 
       const splitedInicialData = data.initialData.split('-');
@@ -216,6 +280,7 @@ const ReportSeller: React.FC = () => {
         splitedInicialData[1] - 1,
         splitedInicialData[2],
       );
+
       const finalFormattedDate = new Date(
         splitedFinalData[0],
         splitedFinalData[1] - 1,
@@ -261,7 +326,6 @@ const ReportSeller: React.FC = () => {
   );
 
   const handleClearFilter = useCallback(() => {
-    setSpecifcOrders([]);
     setSpecifcClient({} as IClient);
     setSelectPaymentType(0);
     formRef.current?.clearField('initialData');
