@@ -37,7 +37,7 @@ export const ContainerClient = styled.div`
 export const ContainerItems = styled.div`
   padding: 16px;
 
-  max-width: 800px;
+  max-width: 900px;
   width: 100%;
 
   max-height: 210px;
@@ -76,11 +76,11 @@ export const ContainerItems = styled.div`
         margin-left: 16px;
       }
 
-      div[name='price'] {
-        width: 500px;
+      div:nth-child(1) {
+        width: 350px;
       }
 
-      div[name='quantity'] {
+      div:nth-child(2) {
         width: 350px;
       }
     }
