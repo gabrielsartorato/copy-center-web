@@ -8,7 +8,7 @@ Este projeto tem como finalidade o controle financeiro de copiadoras em geral.
 
 ## Backend
 
-(https://github.com/gabrielsartorato/copy-center)
+[Copy Backend](https://github.com/gabrielsartorato/copy-center)
 
 ## Tecnologia utilizada
 
