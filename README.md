@@ -1,15 +1,15 @@
-# Controle Financeiro - Copiadora - Web
+# Controle Financeiro - Copiadora - Server
 
 Sistema de controle financeiro para copiadoras.
 
-## Descrição do desafio
+## Descrição do projeto
 
 Este projeto tem como finalidade o controle financeiro de copiadoras em geral.
 
-## Backend
+## Frontend
 
-[Copy Backend](https://github.com/gabrielsartorato/copy-center)
+[Copy Web](https://github.com/gabrielsartorato/copy-center-web)
 
 ## Tecnologia utilizada
 
-[React Native](https://reactnative.dev/)
+[NodeJS](https://nodejs.org/)
